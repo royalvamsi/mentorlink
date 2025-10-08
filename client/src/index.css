@@ -1,0 +1,1 @@
+@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n:root {\n  --color-primary: #1E88E5;\n  --color-primary-100: #E3F2FD;\n  --bg-surface: #F5F5F5;\n}\n\nbody {\n  @apply bg-white text-gray-800 font-sans;\n}

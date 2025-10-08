@@ -1,0 +1,1 @@
+import { io } from 'socket.io-client'\n\nconst URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:4000'\nexport const socket = io(URL, { autoConnect: false })
