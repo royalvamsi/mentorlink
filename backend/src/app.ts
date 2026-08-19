@@ -4,6 +4,7 @@ import { env } from './config/env'
 import healthRoutes from './routes/healthRoutes'
 import authRoutes from './routes/authRoutes'
 import profileRoutes from './routes/profileRoutes'
+import mentorRoutes from './routes/mentorRoutes'
 
 const app: Application = express()
 
@@ -24,6 +25,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 app.use('/api/health', healthRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/profile', profileRoutes)
+app.use('/api/mentors', mentorRoutes)
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 

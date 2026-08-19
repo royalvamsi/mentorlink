@@ -5,6 +5,8 @@ import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
 import ProfilePage from './pages/ProfilePage'
 import EditProfilePage from './pages/EditProfilePage'
+import MentorDiscoveryPage from './pages/MentorDiscoveryPage'
+import MentorProfilePage from './pages/MentorProfilePage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
@@ -31,6 +33,8 @@ export default function App() {
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/profile/edit" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
+        <Route path="/mentors" element={<ProtectedRoute><MentorDiscoveryPage /></ProtectedRoute>} />
+        <Route path="/mentors/:id" element={<ProtectedRoute><MentorProfilePage /></ProtectedRoute>} />
 
         {/* Default: redirect to dashboard or login */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
