@@ -2,6 +2,7 @@ import express, { Application, Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 import { env } from './config/env'
 import healthRoutes from './routes/healthRoutes'
+import authRoutes from './routes/authRoutes'
 
 const app: Application = express()
 
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 // ─── Routes ──────────────────────────────────────────────────────────────────
 
 app.use('/api/health', healthRoutes)
+app.use('/api/auth', authRoutes)
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 
