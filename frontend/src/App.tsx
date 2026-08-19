@@ -16,6 +16,7 @@ import FeedbackPage from './pages/FeedbackPage'
 import FilesPage from './pages/FilesPage'
 import ForumPage from './pages/ForumPage'
 import PostPage from './pages/PostPage'
+import GoalsPage from './pages/GoalsPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
@@ -53,6 +54,7 @@ export default function App() {
         <Route path="/files" element={<ProtectedRoute><FilesPage /></ProtectedRoute>} />
         <Route path="/forum" element={<ProtectedRoute><ForumPage /></ProtectedRoute>} />
         <Route path="/forum/:id" element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
+        <Route path="/goals" element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
 
         {/* Default: redirect to dashboard or login */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
