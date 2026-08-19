@@ -10,6 +10,7 @@ import chatRoutes from './routes/chatRoutes'
 import schedulingRoutes from './routes/schedulingRoutes'
 import feedbackRoutes from './routes/feedbackRoutes'
 import fileRoutes from './routes/fileRoutes'
+import forumRoutes from './routes/forumRoutes'
 
 const app: Application = express()
 
@@ -36,6 +37,7 @@ app.use('/api/chat', chatRoutes)
 app.use('/api/scheduling', schedulingRoutes)
 app.use('/api/feedback', feedbackRoutes)
 app.use('/api/files', fileRoutes)
+app.use('/api/forum', forumRoutes)
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 

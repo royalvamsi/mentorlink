@@ -14,6 +14,8 @@ import SchedulingPage from './pages/SchedulingPage'
 import BookSessionPage from './pages/BookSessionPage'
 import FeedbackPage from './pages/FeedbackPage'
 import FilesPage from './pages/FilesPage'
+import ForumPage from './pages/ForumPage'
+import PostPage from './pages/PostPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
@@ -49,6 +51,8 @@ export default function App() {
         <Route path="/book/:mentorId" element={<ProtectedRoute><BookSessionPage /></ProtectedRoute>} />
         <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
         <Route path="/files" element={<ProtectedRoute><FilesPage /></ProtectedRoute>} />
+        <Route path="/forum" element={<ProtectedRoute><ForumPage /></ProtectedRoute>} />
+        <Route path="/forum/:id" element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
 
         {/* Default: redirect to dashboard or login */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
