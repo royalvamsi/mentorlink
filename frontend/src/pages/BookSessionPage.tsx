@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { schedulingService, type AvailabilitySlot } from '../services/schedulingService'
 import { mentorService, type MentorProfile } from '../services/mentorService'
+import { Navbar } from '../components/Navbar'
 import axios from 'axios'
 
 function fmt(d: string) {
@@ -47,18 +48,10 @@ export default function BookSessionPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-950"><div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" /></div>
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <Link to="/mentors" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-          </div>
-          <span className="font-bold text-white">MentorLink</span>
-        </Link>
-        <Link to={`/mentors/${mentorId}`} className="text-sm text-slate-400 hover:text-white">← Back to Profile</Link>
-      </header>
+    <div className="min-h-screen bg-slate-950 flex flex-col">
+      <Navbar />
 
-      <main className="max-w-2xl mx-auto px-6 py-8">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-10 w-full">
         <h1 className="text-2xl font-bold text-white mb-2">Book a Session</h1>
         {mentor && (
           <div className="flex items-center gap-3 mb-6 p-4 bg-slate-900 border border-slate-800 rounded-xl">

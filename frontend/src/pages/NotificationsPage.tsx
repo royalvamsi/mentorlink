@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 import { useSocket } from '../context/SocketContext'
 import { notificationService, type NotificationItem } from '../services/notificationService'
+import { Navbar } from '../components/Navbar'
 
 const ICONS: Record<string, string> = {
   MENTORSHIP_REQUEST: '🤝',
@@ -21,7 +21,6 @@ const ICONS: Record<string, string> = {
 function fmt(d: string) { return new Date(d).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) }
 
 export default function NotificationsPage() {
-  const { logout } = useAuth()
   const { clearUnread } = useSocket()
   const navigate = useNavigate()
   const [items, setItems] = useState<NotificationItem[]>([])
@@ -53,23 +52,10 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-          </div>
-          <span className="font-bold text-white">MentorLink</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <Link to="/dashboard" className="text-sm text-slate-400 hover:text-white">← Dashboard</Link>
-          <button onClick={logout} className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white transition">Sign out</button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-slate-950 flex flex-col">
+      <Navbar />
 
-      <main className="max-w-2xl mx-auto px-6 py-8">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-10 w-full">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-white">Notifications</h1>
           <button

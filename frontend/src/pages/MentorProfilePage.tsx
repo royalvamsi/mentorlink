@@ -1,7 +1,8 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { mentorService, type MentorProfile } from '../services/mentorService'
 import { useAuth } from '../context/AuthContext'
+import { Navbar } from '../components/Navbar'
 
 const ROLE_COLORS: Record<string, string> = {
   SENIOR: 'bg-teal-500/20 text-teal-300',
@@ -30,26 +31,24 @@ export default function MentorProfilePage() {
   )
 
   if (error || !mentor) return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <div className="text-center"><p className="text-slate-400 mb-4">{error || 'Mentor not found.'}</p><button onClick={() => navigate(-1)} className="text-indigo-400 hover:text-indigo-300">← Go back</button></div>
+    <div className="min-h-screen bg-slate-950 flex flex-col">
+      <Navbar />
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="text-center bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-sm w-full">
+          <p className="text-slate-400 mb-4">{error || 'Mentor not found.'}</p>
+          <button onClick={() => navigate(-1)} className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-indigo-400 rounded-xl text-sm font-medium transition">← Go back</button>
+        </div>
+      </div>
     </div>
   )
 
   const { name, role, profile } = mentor
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <Link to="/mentors" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4 6v-2m0 0a4 4 0 10-4-4 4 4 0 004 4zm0 0a4 4 0 104 4 4 4 0 00-4-4z" /></svg>
-          </div>
-          <span className="font-bold text-white">MentorLink</span>
-        </Link>
-        <Link to="/mentors" className="text-sm text-slate-400 hover:text-white">← Back to mentors</Link>
-      </header>
+    <div className="min-h-screen bg-slate-950 flex flex-col">
+      <Navbar />
 
-      <main className="max-w-2xl mx-auto px-6 py-10">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-10 w-full">
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-6">
           <div className="flex items-start gap-5">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold text-white shrink-0">

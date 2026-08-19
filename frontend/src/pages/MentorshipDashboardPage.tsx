@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { mentorshipService, type MentorshipRequest, type ActiveMentorship } from '../services/mentorshipService'
 import { useAuth } from '../context/AuthContext'
+import { Navbar } from '../components/Navbar'
 import axios from 'axios'
 
 
@@ -14,7 +15,7 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default function MentorshipDashboardPage() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const isMentor = user?.role === 'SENIOR' || user?.role === 'ALUMNI'
 
   const [incoming, setIncoming] = useState<MentorshipRequest[]>([])
@@ -58,19 +59,10 @@ export default function MentorshipDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center"><svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4 6v-2m0 0a4 4 0 10-4-4 4 4 0 004 4zm0 0a4 4 0 104 4 4 4 0 00-4-4z" /></svg></div>
-          <span className="font-bold text-white">MentorLink</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <Link to="/profile" className="text-sm text-slate-300 hover:text-white">{user?.name}</Link>
-          <button onClick={logout} className="text-sm px-3 py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white transition">Sign out</button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-slate-950 flex flex-col">
+      <Navbar />
 
-      <main className="max-w-3xl mx-auto px-6 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 w-full">
         <h1 className="text-2xl font-bold text-white mb-6">Mentorships</h1>
         {actionError && <div className="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{actionError}</div>}
 

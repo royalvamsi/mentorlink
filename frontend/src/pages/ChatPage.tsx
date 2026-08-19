@@ -3,9 +3,10 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSocket } from '../context/SocketContext'
 import { chatService, type Conversation, type Message } from '../services/chatService'
+import { Navbar } from '../components/Navbar'
 
 export default function ChatPage() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const { socket, isConnected, isUserOnline } = useSocket()
   const location = useLocation()
   const [searchParams] = useSearchParams()
@@ -224,27 +225,7 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col font-sans text-slate-100 antialiased">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur px-6 py-3.5 flex items-center justify-between shrink-0">
-        <Link to="/dashboard" className="flex items-center gap-3 group">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg group-hover:bg-indigo-500 transition">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4 6v-2m0 0a4 4 0 10-4-4 4 4 0 004 4zm0 0a4 4 0 104 4 4 4 0 00-4-4z" />
-            </svg>
-          </div>
-          <span className="font-bold text-white tracking-tight text-base">MentorLink</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-xs text-slate-300">
-            <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} />
-            <span>{isConnected ? 'Connected' : 'Reconnecting...'}</span>
-          </div>
-          <Link to="/profile" className="text-sm text-slate-300 hover:text-white transition">{user?.name}</Link>
-          <button onClick={logout} className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:border-slate-500 transition">
-            Sign out
-          </button>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Error Banner */}
       {errorBanner && (
@@ -255,11 +236,14 @@ export default function ChatPage() {
       )}
 
       {/* Main Container */}
-      <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 61px)' }}>
+      <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 105px)' }}>
         {/* Conversation List Sidebar */}
-        <aside className="w-80 border-r border-slate-800 bg-slate-900/30 flex flex-col shrink-0">
+        <aside className={`w-full md:w-80 border-r border-slate-800 bg-slate-900/30 flex flex-col shrink-0 ${activeConv ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-            <h2 className="font-semibold text-white text-sm">Direct Messages</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="font-semibold text-white text-sm">Direct Messages</h2>
+              <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} title={isConnected ? 'Connected' : 'Reconnecting...'} />
+            </div>
             <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-medium">
               {conversations.length}
             </span>
@@ -339,7 +323,7 @@ export default function ChatPage() {
         </aside>
 
         {/* Chat Message Window */}
-        <main className="flex-1 flex flex-col bg-slate-950">
+        <main className={`flex-1 flex flex-col bg-slate-950 ${!activeConv ? 'hidden md:flex' : 'flex'}`}>
           {!activeConv || !activeOther ? (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-500">
               <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-3xl mb-4 shadow-inner">
@@ -353,8 +337,15 @@ export default function ChatPage() {
           ) : (
             <>
               {/* Chat View Header */}
-              <div className="px-6 py-3.5 border-b border-slate-800 bg-slate-900/40 flex items-center justify-between">
-                <div className="flex items-center gap-3.5">
+              <div className="px-4 sm:px-6 py-3.5 border-b border-slate-800 bg-slate-900/40 flex items-center justify-between">
+                <div className="flex items-center gap-2 sm:gap-3.5">
+                  <button
+                    onClick={() => setActiveConv(null)}
+                    className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800 border border-slate-700 focus:outline-none"
+                    aria-label="Back to conversations"
+                  >
+                    ←
+                  </button>
                   <div className="relative shrink-0">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-sm shadow">
                       {activeOther.name[0]?.toUpperCase()}

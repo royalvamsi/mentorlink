@@ -1,7 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 import { goalService, type Goal, type GoalStatus } from '../services/goalService'
+import { Navbar } from '../components/Navbar'
 import axios from 'axios'
 
 const STATUS_COLORS: Record<GoalStatus, string> = {
@@ -29,7 +28,6 @@ function ProgressBar({ value }: { value: number }) {
 function fmt(d: string) { return new Date(d).toLocaleDateString([], { dateStyle: 'medium' }) }
 
 export default function GoalsPage() {
-  const { logout } = useAuth()
   const [goals, setGoals] = useState<Goal[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -49,6 +47,14 @@ export default function GoalsPage() {
   const [addingMilestoneTo, setAddingMilestoneTo] = useState<string | null>(null)
   const [newMilestoneTitle, setNewMilestoneTitle] = useState('')
 
+  function resetForm() {
+    setTitle('')
+    setDescription('')
+    setTargetDate('')
+    setTags('')
+    setMilestoneInputs([''])
+  }
+
   async function refresh() {
     setLoading(true)
     try { setGoals(await goalService.getGoals(filterStatus || undefined)) }
@@ -59,22 +65,28 @@ export default function GoalsPage() {
   useEffect(() => { refresh() }, [filterStatus])
 
   async function handleCreate(e: FormEvent) {
-    e.preventDefault(); setCreating(true); setError('')
+    e.preventDefault()
+    if (!title.trim()) return
+    setCreating(true); setError(''); setSuccess('')
     try {
-      const ms = milestoneInputs.filter(t => t.trim()).map(t => ({ title: t }))
-      await goalService.createGoal({ title, description: description || undefined, targetDate: targetDate || undefined, milestones: ms, tags: tags.split(',').map(t => t.trim()).filter(Boolean) })
-      setSuccess('Goal created!'); setShowCreate(false); resetForm()
+      const validMilestones = milestoneInputs.filter(m => m.trim()).map(t => ({ title: t }))
+      await goalService.createGoal({
+        title, description: description || undefined,
+        targetDate: targetDate || undefined,
+        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+        milestones: validMilestones.length ? validMilestones : undefined,
+      })
+      setSuccess('Goal created!'); setShowCreate(false)
+      resetForm()
       await refresh()
     } catch (err) {
-      if (axios.isAxiosError(err)) setError(err.response?.data?.message ?? 'Failed')
+      if (axios.isAxiosError(err)) setError(err.response?.data?.message ?? 'Failed to create goal')
     } finally { setCreating(false) }
   }
 
-  function resetForm() { setTitle(''); setDescription(''); setTargetDate(''); setTags(''); setMilestoneInputs(['']) }
-
-  async function handleToggleMilestone(goalId: string, msId: string) {
+  async function handleToggleMilestone(goalId: string, milestoneId: string) {
     try {
-      const updated = await goalService.toggleMilestone(goalId, msId)
+      const updated = await goalService.toggleMilestone(goalId, milestoneId)
       setGoals(prev => prev.map(g => g._id === goalId ? updated : g))
     } catch { /* ignore */ }
   }
@@ -82,9 +94,9 @@ export default function GoalsPage() {
   async function handleAddMilestone(goalId: string) {
     if (!newMilestoneTitle.trim()) return
     try {
-      const updated = await goalService.addMilestone(goalId, newMilestoneTitle)
+      const updated = await goalService.addMilestone(goalId, newMilestoneTitle.trim())
       setGoals(prev => prev.map(g => g._id === goalId ? updated : g))
-      setAddingMilestoneTo(null); setNewMilestoneTitle('')
+      setNewMilestoneTitle(''); setAddingMilestoneTo(null)
     } catch { /* ignore */ }
   }
 
@@ -96,30 +108,16 @@ export default function GoalsPage() {
   }
 
   async function handleDelete(goalId: string) {
-    if (!confirm('Delete this goal?')) return
+    if (!confirm('Are you sure you want to delete this goal?')) return
     try { await goalService.deleteGoal(goalId); setGoals(prev => prev.filter(g => g._id !== goalId)); setSuccess('Goal deleted') }
     catch { /* ignore */ }
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          </div>
-          <span className="font-bold text-white">MentorLink</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <nav className="flex items-center gap-3 text-sm text-slate-400">
-            <Link to="/dashboard" className="hover:text-white">Dashboard</Link>
-            <Link to="/mentorships" className="hover:text-white">Mentorships</Link>
-          </nav>
-          <button onClick={logout} className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white transition">Sign out</button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-slate-950 flex flex-col">
+      <Navbar />
 
-      <main className="max-w-4xl mx-auto px-6 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 w-full">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white">Goal Tracking</h1>

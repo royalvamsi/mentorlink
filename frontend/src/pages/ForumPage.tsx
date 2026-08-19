@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 import { forumService, type Post, CATEGORIES, type PostCategory } from '../services/forumService'
+import { Navbar } from '../components/Navbar'
 import axios from 'axios'
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -16,7 +16,6 @@ const CATEGORY_COLORS: Record<string, string> = {
 function fmt(d: string) { return new Date(d).toLocaleDateString([], { dateStyle: 'medium' }) }
 
 export default function ForumPage() {
-  const { logout } = useAuth()
   const navigate = useNavigate()
   const [posts, setPosts] = useState<Post[]>([])
   const [total, setTotal] = useState(0)
@@ -62,24 +61,10 @@ export default function ForumPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
-          </div>
-          <span className="font-bold text-white">MentorLink</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <nav className="flex items-center gap-3 text-sm text-slate-400">
-            <Link to="/dashboard" className="hover:text-white">Dashboard</Link>
-            <Link to="/mentors" className="hover:text-white">Mentors</Link>
-          </nav>
-          <button onClick={logout} className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white transition">Sign out</button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-slate-950 flex flex-col">
+      <Navbar />
 
-      <main className="max-w-4xl mx-auto px-6 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 w-full">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white">Community Forum</h1>

@@ -1,7 +1,8 @@
 import { useState, useEffect, type FormEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { forumService, type Post, type Comment } from '../services/forumService'
+import { Navbar } from '../components/Navbar'
 import axios from 'axios'
 
 function fmt(d: string) { return new Date(d).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) }
@@ -17,7 +18,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export default function PostPage() {
   const { id } = useParams<{ id: string }>()
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const [post, setPost] = useState<Post | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
@@ -61,9 +62,13 @@ export default function PostPage() {
     } finally { setSubmitting(false) }
   }
 
+  async function handleDeletePost() {
+    if (!id || !confirm('Are you sure you want to delete this post?')) return
+    try { await forumService.deletePost(id); window.location.href = '/forum' } catch { /* ignore */ }
+  }
+
   async function handleDeleteComment(commentId: string) {
-    try { await forumService.deleteComment(commentId); setComments(prev => prev.filter(c => c._id !== commentId)) }
-    catch { /* ignore */ }
+    try { await forumService.deleteComment(commentId); await load() } catch { /* ignore */ }
   }
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-950"><div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" /></div>
@@ -76,21 +81,10 @@ export default function PostPage() {
   const replies = (parentId: string) => comments.filter(c => c.parentCommentId === parentId)
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
-          </div>
-          <span className="font-bold text-white">MentorLink</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <Link to="/forum" className="text-sm text-slate-400 hover:text-white">← Forum</Link>
-          <button onClick={logout} className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white transition">Sign out</button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-slate-950 flex flex-col">
+      <Navbar />
 
-      <main className="max-w-3xl mx-auto px-6 py-8">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10 w-full">
         {/* Post */}
         <article className="bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-6">
           <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -114,12 +108,7 @@ export default function PostPage() {
             <div className="flex items-center gap-2">
               {(isAuthor || user?.role === 'ADMIN') && (
                 <button
-                  onClick={async () => {
-                    if (window.confirm('Delete this post?')) {
-                      await forumService.deletePost(post._id)
-                      window.location.href = '/forum'
-                    }
-                  }}
+                  onClick={handleDeletePost}
                   className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition"
                 >
                   Delete Post

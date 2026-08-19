@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent, type DragEvent } from 'react'
-import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/authService'
+import { Navbar } from '../components/Navbar'
 import axios from 'axios'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5000'
@@ -43,7 +43,7 @@ interface FileRecord {
 }
 
 export default function FilesPage() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const [files, setFiles] = useState<FileRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -105,24 +105,10 @@ export default function FilesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-          </div>
-          <span className="font-bold text-white">MentorLink</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <nav className="flex items-center gap-3 text-sm text-slate-400">
-            <Link to="/dashboard" className="hover:text-white">Dashboard</Link>
-            <Link to="/mentorships" className="hover:text-white">Mentorships</Link>
-          </nav>
-          <button onClick={logout} className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white transition">Sign out</button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-slate-950 flex flex-col">
+      <Navbar />
 
-      <main className="max-w-4xl mx-auto px-6 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 w-full">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white">File Sharing</h1>

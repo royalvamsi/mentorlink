@@ -1,7 +1,7 @@
-﻿import { useState, useEffect, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { profileService, type ProfileData } from '../services/profileService'
-import { useAuth } from '../context/AuthContext'
+import { Navbar } from '../components/Navbar'
 import axios from 'axios'
 
 const YEARS = ['1st', '2nd', '3rd', '4th', 'Alumni']
@@ -38,7 +38,6 @@ function TagInput({ label, value, onChange }: { label: string; value: string[]; 
 }
 
 export default function EditProfilePage() {
-  const { user } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState<ProfileData>({ skills: [], academicInterests: [], careerInterests: [] })
   const [loading, setLoading] = useState(true)
@@ -72,18 +71,10 @@ export default function EditProfilePage() {
   )
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4 6v-2m0 0a4 4 0 10-4-4 4 4 0 004 4zm0 0a4 4 0 104 4 4 4 0 00-4-4z" /></svg>
-          </div>
-          <span className="font-bold text-white">MentorLink</span>
-        </Link>
-        <span className="text-slate-400 text-sm">{user?.name}</span>
-      </header>
+    <div className="min-h-screen bg-slate-950 flex flex-col">
+      <Navbar />
 
-      <main className="max-w-2xl mx-auto px-6 py-10">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-10 w-full">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-white">Edit Profile</h1>

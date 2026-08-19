@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Link, useSearchParams, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { NotificationBell } from '../components/NotificationBell'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { searchService, type SearchResult, type SearchType } from '../services/searchService'
+import { Navbar } from '../components/Navbar'
 
 const TABS: { key: SearchType; label: string; icon: string }[] = [
   { key: 'all', label: 'All', icon: '🔍' },
@@ -57,7 +56,6 @@ function ResultCard({ result }: { result: SearchResult }) {
 }
 
 export default function SearchPage() {
-  const { logout } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const initialQ = searchParams.get('q') ?? ''
@@ -102,25 +100,10 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      {/* Header */}
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4 6v-2m0 0a4 4 0 10-4-4 4 4 0 004 4zm0 0a4 4 0 104 4 4 4 0 00-4-4z" />
-            </svg>
-          </div>
-          <span className="font-bold text-white">MentorLink</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <NotificationBell />
-          <Link to="/dashboard" className="text-sm text-slate-400 hover:text-white">Dashboard</Link>
-          <button onClick={logout} className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white transition">Sign out</button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-slate-950 flex flex-col">
+      <Navbar />
 
-      <main className="max-w-3xl mx-auto px-6 py-10">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10 w-full">
         <h1 className="text-2xl font-bold text-white mb-6">Search</h1>
 
         {/* Search form */}
