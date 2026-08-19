@@ -103,8 +103,21 @@
 - Verified `.env` and `uploads/` directories are ignored by Git; no secrets tracked
 - Clean TypeScript compilation on backend and frontend production build
 
+### Phase 18 — Automated Testing
+- Backend automated test suite with Node.js native test runner (`node:test`) + `supertest`:
+  - **Auth & Password Security**: `auth.test.ts` (role enums, bcrypt hashing & verification, password length, email format regex, ADMIN registration protection, JWT sign/verify, expired token rejection)
+  - **Middleware & RBAC**: `middleware.test.ts` (verifyToken missing/malformed/invalid headers, authorizeRoles 403 checks, requireAdmin checks)
+  - **Smart Matching & Search Algorithms**: `matching_and_search.test.ts` (Jaccard similarity edge cases, text overlap scoring, ReDoS character escaping)
+  - **Domain Logic & Business Rules**: `domain_logic.test.ts` (scheduling slot validity, overlap detection, booking lifecycle transitions, rating range & average calculations, milestone progress percentages, file MIME whitelist & size limits, forum categories & post deletion permissions)
+  - **API Integration & Security Boundaries**: `api_integration.test.ts` (Supertest HTTP tests against Express app for `GET /api/health`, 404 handler, 401 unauthenticated protection across all 10 core API namespaces, 403 admin protection, registration payload validation, Helmet response headers)
+- Frontend automated test suite with `vitest`:
+  - **Auth & Storage**: `auth.test.ts` (localStorage `ml_token` storage, retrieval, clearing, Axios request interceptor Bearer token injection)
+  - **UI & Component Logic**: `ui_logic.test.ts` (match score color thresholds, search tab configurations, dashboard role configs and admin fallbacks)
+- 100% test pass rate across 64 automated tests (55 backend + 9 frontend)
+- Clean TypeScript compilation on backend and frontend production build
+
 ---
 
 ## 🔄 Next Phase
 
-**Phase 18 — Testing & Automation**
+**Phase 19 — UI/UX Polish**

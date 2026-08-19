@@ -1,16 +1,17 @@
 /**
  * Environment variable loader.
  *
- * Reads variables from the process environment (after dotenv has loaded .env)
- * and exposes them as a strongly-typed config object.
- *
- * Throws at startup if a required variable is missing — fail fast rather than
- * discovering the missing config at runtime.
+ * Reads variables from process.env (after loading .env) and exposes them
+ * as a strongly-typed config object.
  */
+import 'dotenv/config'
 
-function requireEnv(key: string): string {
+function requireEnv(key: string, testFallback?: string): string {
   const value = process.env[key]
   if (!value) {
+    if (process.env['NODE_ENV'] === 'test' && testFallback) {
+      return testFallback
+    }
     throw new Error(`Missing required environment variable: ${key}`)
   }
   return value
@@ -28,10 +29,10 @@ export const env = {
   PORT: parseInt(optionalEnv('PORT', '5000'), 10),
 
   /** MongoDB Atlas connection string */
-  MONGO_URI: requireEnv('MONGO_URI'),
+  MONGO_URI: requireEnv('MONGO_URI', 'mongodb://127.0.0.1:27017/mentorlink_test'),
 
   /** Secret used to sign JWT tokens — must be long and random in production */
-  JWT_SECRET: requireEnv('JWT_SECRET'),
+  JWT_SECRET: requireEnv('JWT_SECRET', 'test_jwt_secret_key_for_automated_testing_purposes_only'),
 
   /** JWT expiry duration (e.g. '7d', '24h') */
   JWT_EXPIRES_IN: optionalEnv('JWT_EXPIRES_IN', '7d'),

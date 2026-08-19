@@ -7,6 +7,7 @@
     "dev": "tsx --watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "test": "tsx --test src/tests/**/*.test.ts",
     "lint": "eslint src --ext .ts"
   },
   "engines": {
@@ -34,6 +35,8 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.2.0",
+    "@types/supertest": "^7.2.1",
+    "supertest": "^7.2.2",
     "tsx": "^4.19.4",
     "typescript": "^7.0.2"
   }
