@@ -1,5 +1,6 @@
-﻿import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
+import { NotificationBell } from '../components/NotificationBell'
 
 const ROLE_CONFIG = {
   JUNIOR: {
@@ -10,7 +11,7 @@ const ROLE_CONFIG = {
       { title: 'Find a Mentor', desc: 'Browse senior students and alumni in your field.', to: '/mentors', icon: '🔍' },
       { title: 'My Mentorships', desc: 'View your active mentorship connections.', to: '/mentorships', icon: '🤝' },
       { title: 'My Goals', desc: 'Track your academic and career goals.', to: '/goals', icon: '🎯' },
-      { title: 'Community', desc: 'Discuss topics with peers and mentors.', to: '/community', icon: '💬' },
+      { title: 'Community', desc: 'Discuss topics with peers and mentors.', to: '/forum', icon: '💬' },
     ],
   },
   SENIOR: {
@@ -19,9 +20,9 @@ const ROLE_CONFIG = {
     accent: 'from-teal-500 to-indigo-600',
     cards: [
       { title: 'Mentorship Requests', desc: 'View and respond to incoming requests.', to: '/mentorships', icon: '📨' },
-      { title: 'My Mentees', desc: 'Manage your active mentee connections.', to: '/mentorships/active', icon: '🤝' },
-      { title: 'Set Availability', desc: 'Configure your available time slots.', to: '/availability', icon: '📅' },
-      { title: 'Community', desc: 'Share knowledge with the community.', to: '/community', icon: '💬' },
+      { title: 'My Mentees', desc: 'Manage your active mentee connections.', to: '/mentorships', icon: '🤝' },
+      { title: 'Set Availability', desc: 'Configure your available time slots.', to: '/scheduling', icon: '📅' },
+      { title: 'Community', desc: 'Share knowledge with the community.', to: '/forum', icon: '💬' },
     ],
   },
   ALUMNI: {
@@ -30,9 +31,9 @@ const ROLE_CONFIG = {
     accent: 'from-amber-500 to-orange-600',
     cards: [
       { title: 'Mentorship Requests', desc: 'View and respond to incoming requests.', to: '/mentorships', icon: '📨' },
-      { title: 'My Mentees', desc: 'Manage your active mentee connections.', to: '/mentorships/active', icon: '🤝' },
-      { title: 'Set Availability', desc: 'Configure your available time slots.', to: '/availability', icon: '📅' },
-      { title: 'Community', desc: 'Share industry insights with students.', to: '/community', icon: '💬' },
+      { title: 'My Mentees', desc: 'Manage your active mentee connections.', to: '/mentorships', icon: '🤝' },
+      { title: 'Set Availability', desc: 'Configure your available time slots.', to: '/scheduling', icon: '📅' },
+      { title: 'Community', desc: 'Share industry insights with students.', to: '/forum', icon: '💬' },
     ],
   },
 }
@@ -56,6 +57,7 @@ export default function DashboardPage() {
           <span className="font-bold text-white text-lg">MentorLink</span>
         </div>
         <div className="flex items-center gap-4">
+          <NotificationBell />
           <Link to="/profile" className="text-sm text-slate-300 hover:text-white transition">
             {user.name}
           </Link>

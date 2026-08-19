@@ -3,6 +3,8 @@ import {
   createAvailability, getMentorAvailability, updateAvailability, deleteAvailability,
   createBooking, getBookings, getBookingById, updateBookingStatus, SchedulingError,
 } from '../services/scheduling.service'
+import { createNotification } from '../services/notification.service'
+import User from '../models/User'
 
 function handleErr(err: unknown, res: Response, next: NextFunction): void {
   if (err instanceof SchedulingError) {
@@ -54,6 +56,17 @@ export async function bookSlot(req: Request, res: Response, next: NextFunction):
     const { availabilityId, notes } = req.body as { availabilityId: string; notes?: string }
     if (!availabilityId) { res.status(400).json({ status: 'error', message: 'availabilityId required' }); return }
     const data = await createBooking(req.user!.userId, availabilityId, notes)
+    // Notify mentor about new booking (fire-and-forget, data is populated)
+    if (data) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const booking = data as any as { mentorId: { _id: { toString(): string }; name: string }; startTime: string }
+      const mentorId = booking.mentorId._id.toString()
+      User.findById(req.user!.userId).select('name').lean().then(mentee => {
+        createNotification(mentorId, 'BOOKING_CONFIRMED', 'New Session Booked',
+          `${mentee?.name ?? 'A mentee'} booked a session on ${new Date(booking.startTime).toLocaleDateString()}`, '/scheduling'
+        ).catch(() => {})
+      }).catch(() => {})
+    }
     res.status(201).json({ status: 'success', data })
   } catch (err) { handleErr(err, res, next) }
 }

@@ -17,6 +17,7 @@ import FilesPage from './pages/FilesPage'
 import ForumPage from './pages/ForumPage'
 import PostPage from './pages/PostPage'
 import GoalsPage from './pages/GoalsPage'
+import NotificationsPage from './pages/NotificationsPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
@@ -55,6 +56,7 @@ export default function App() {
         <Route path="/forum" element={<ProtectedRoute><ForumPage /></ProtectedRoute>} />
         <Route path="/forum/:id" element={<ProtectedRoute><PostPage /></ProtectedRoute>} />
         <Route path="/goals" element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
 
         {/* Default: redirect to dashboard or login */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />

@@ -12,6 +12,7 @@ import feedbackRoutes from './routes/feedbackRoutes'
 import fileRoutes from './routes/fileRoutes'
 import forumRoutes from './routes/forumRoutes'
 import goalRoutes from './routes/goalRoutes'
+import notificationRoutes from './routes/notificationRoutes'
 
 const app: Application = express()
 
@@ -40,6 +41,7 @@ app.use('/api/feedback', feedbackRoutes)
 app.use('/api/files', fileRoutes)
 app.use('/api/forum', forumRoutes)
 app.use('/api/goals', goalRoutes)
+app.use('/api/notifications', notificationRoutes)
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 

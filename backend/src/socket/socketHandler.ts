@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import { env } from '../config/env'
 import { JwtPayload } from '../types/auth.types'
 import { saveMessage, markRead } from '../services/chat.service'
+import { setIo } from '../services/notification.service'
 import Conversation from '../models/Conversation'
 import { Types } from 'mongoose'
 
@@ -17,6 +18,9 @@ export function initSocket(httpServer: HttpServer) {
       credentials: true,
     },
   })
+
+  // Expose io to notification service for real-time delivery
+  setIo(io)
 
   // ─── JWT Authentication Middleware ───────────────────────────────────────
   io.use((socket: Socket, next) => {
@@ -60,6 +64,9 @@ export function initSocket(httpServer: HttpServer) {
     if (!wasOnline) {
       socket.broadcast.emit('user_online', { userId })
     }
+
+    // ─── Join Private User Room (for targeted notifications) ─────────────────
+    socket.join(`user:${userId}`)
 
     // ─── Join Conversation Room ─────────────────────────────────────────────
     socket.on('join_conversation', async (conversationId: string) => {
