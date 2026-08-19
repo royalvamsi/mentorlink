@@ -13,6 +13,7 @@ import fileRoutes from './routes/fileRoutes'
 import forumRoutes from './routes/forumRoutes'
 import goalRoutes from './routes/goalRoutes'
 import notificationRoutes from './routes/notificationRoutes'
+import adminRoutes from './routes/adminRoutes'
 
 const app: Application = express()
 
@@ -42,6 +43,7 @@ app.use('/api/files', fileRoutes)
 app.use('/api/forum', forumRoutes)
 app.use('/api/goals', goalRoutes)
 app.use('/api/notifications', notificationRoutes)
+app.use('/api/admin', adminRoutes)
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 

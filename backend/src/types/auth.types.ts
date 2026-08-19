@@ -7,7 +7,7 @@
 
 // ─── Role ────────────────────────────────────────────────────────────────────
 
-export const USER_ROLES = ['JUNIOR', 'SENIOR', 'ALUMNI'] as const
+export const USER_ROLES = ['JUNIOR', 'SENIOR', 'ALUMNI', 'ADMIN'] as const
 export type UserRole = (typeof USER_ROLES)[number]
 
 // ─── JWT Payload ─────────────────────────────────────────────────────────────
