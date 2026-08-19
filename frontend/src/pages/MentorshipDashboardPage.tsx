@@ -95,7 +95,7 @@ export default function MentorshipDashboardPage() {
                           <div className="text-xs text-slate-400">{other.role} · Since {new Date(m.startedAt).toLocaleDateString()}</div>
                         </div>
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS.ACTIVE}`}>ACTIVE</span>
-                        <Link to={`/chat`} className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition">Chat</Link>
+                        <Link to={`/chat?userId=${other._id}`} className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition">Chat</Link>
                       </div>
                     )
                   })}

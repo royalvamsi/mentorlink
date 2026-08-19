@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes'
 import profileRoutes from './routes/profileRoutes'
 import mentorRoutes from './routes/mentorRoutes'
 import mentorshipRoutes from './routes/mentorshipRoutes'
+import chatRoutes from './routes/chatRoutes'
 
 const app: Application = express()
 
@@ -28,6 +29,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/profile', profileRoutes)
 app.use('/api/mentors', mentorRoutes)
 app.use('/api/mentorships', mentorshipRoutes)
+app.use('/api/chat', chatRoutes)
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 

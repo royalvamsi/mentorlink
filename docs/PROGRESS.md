@@ -15,27 +15,44 @@
 - Backend: Typed environment variable loader
 - Backend: `.env.example` for both frontend and backend
 
+### Phase 2 — Authentication & Authorization
+- `User` Mongoose model with bcrypt password hashing and roles (`JUNIOR`, `SENIOR`, `ALUMNI`)
+- Auth service: `registerUser`, `loginUser`, `getMeUser`
+- Auth controller and routes (`/api/auth/register`, `/api/auth/login`, `/api/auth/me`)
+- Middleware: `verifyToken` and `authorizeRoles`
+- Frontend: `AuthContext`, `ProtectedRoute`, `LoginPage`, `RegisterPage`, `DashboardPage`
+
+### Phase 3 — User Profiles
+- `Profile` Mongoose model with skills, academic/career interests, bio, year, links
+- Profile service, controller, and routes (`/api/profile/me`, `/api/profile/:userId`)
+- Frontend: `ProfilePage`, `EditProfilePage`, `profileService`
+
+### Phase 4 — Mentor Discovery
+- Discovery service with search, multi-skill filtering, department filtering, pagination
+- Mentor controller and routes (`/api/mentors`, `/api/mentors/:id`)
+- Frontend: `MentorDiscoveryPage`, `MentorProfilePage`, `MentorCard`, `mentorService`
+
+### Phase 5 — Mentorship Requests & Connections
+- `MentorshipRequest` and `Mentorship` Mongoose models
+- Request lifecycle: send, cancel, accept, reject, list incoming/sent/active
+- Mentorship controller and routes (`/api/mentorships/*`)
+- Frontend: `MentorshipDashboardPage`, `SendRequestPage`, `mentorshipService`
+
+### Phase 6 — Real-Time Chat
+- `Conversation` and `Message` Mongoose models
+- Chat service with 1-on-1 conversations, message history pagination, unread counters, mark-as-read
+- Chat controller and routes (`/api/chat/conversations`, `/api/chat/conversations/:id/messages`, etc.)
+- Socket.io integration with JWT authentication middleware on shared HTTP server
+- Real-time events: `join_conversation`, `send_message`, `receive_message`, `typing`, `stop_typing`, `mark_read`, `messages_read`
+- Online presence tracking supporting multiple tabs (`online_users`, `user_online`, `user_offline`)
+- Frontend: `SocketContext` provider, `ChatPage` with conversation sidebar, message list, typing indicators, read receipts, auto-scroll, online indicators, and error/empty states
+
 ---
 
 ## 🔄 Current Feature
 
-None in progress.
+Phase 6 completed. Ready for Phase 7.
 
----
-
-## 📋 Next Features
-
-### Phase 2 — Authentication
-- [ ] `User` Mongoose model with role enum (`JUNIOR`, `SENIOR`, `ALUMNI`)
-- [ ] `POST /api/auth/register` — validate input, hash password, issue JWT
-- [ ] `POST /api/auth/login` — verify credentials, issue JWT
-- [ ] `POST /api/auth/logout` — invalidate token (client-side or server-side blocklist)
-- [ ] `verifyToken` middleware — decode and attach user to `req`
-- [ ] `authorizeRoles` middleware — role-based access control
-- [ ] Frontend: Register and Login pages
-- [ ] Frontend: Auth context + persistent login (`localStorage` / HTTP-only cookie TBD)
-- [ ] Frontend: Protected route wrapper
-- [ ] Frontend: Logout flow
 
 ---
 

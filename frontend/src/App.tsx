@@ -9,6 +9,7 @@ import MentorDiscoveryPage from './pages/MentorDiscoveryPage'
 import MentorProfilePage from './pages/MentorProfilePage'
 import MentorshipDashboardPage from './pages/MentorshipDashboardPage'
 import SendRequestPage from './pages/SendRequestPage'
+import ChatPage from './pages/ChatPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="/mentors/:id" element={<ProtectedRoute><MentorProfilePage /></ProtectedRoute>} />
         <Route path="/mentorships" element={<ProtectedRoute><MentorshipDashboardPage /></ProtectedRoute>} />
         <Route path="/mentorships/request/:mentorId" element={<ProtectedRoute><SendRequestPage /></ProtectedRoute>} />
+        <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
 
         {/* Default: redirect to dashboard or login */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
