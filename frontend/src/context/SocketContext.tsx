@@ -66,6 +66,13 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socket.on('connect', () => setIsConnected(true))
     socket.on('disconnect', () => setIsConnected(false))
 
+    // On reconnect, re-sync unread count to catch anything missed while offline
+    socket.on('connect', () => {
+      import('../services/notificationService').then(({ notificationService }) => {
+        notificationService.getAll().then(data => setUnreadCount(data.unreadCount)).catch(() => {})
+      })
+    })
+
     socket.on('online_users', (users: string[]) => {
       if (Array.isArray(users)) setOnlineUsers(users)
     })
@@ -81,6 +88,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       setLatestNotification(notification)
       setUnreadCount(prev => prev + 1)
     })
+
 
     socketRef.current = socket
 
