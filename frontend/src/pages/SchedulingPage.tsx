@@ -16,14 +16,6 @@ function fmt(d: string) {
   return new Date(d).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
 }
 
-function toLocalInput(utcString?: string): string {
-  if (!utcString) return ''
-  const d = new Date(utcString)
-  // Format as yyyy-MM-ddTHH:mm for datetime-local input
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
-
 export default function SchedulingPage() {
   const { user, logout } = useAuth()
   const isMentor = user?.role === 'SENIOR' || user?.role === 'ALUMNI'

@@ -1,5 +1,7 @@
 import express, { Application, Request, Response, NextFunction } from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import { env } from './config/env'
 import healthRoutes from './routes/healthRoutes'
 import authRoutes from './routes/authRoutes'
@@ -19,20 +21,52 @@ import searchRoutes from './routes/searchRoutes'
 
 const app: Application = express()
 
-// ─── Security / Global Middleware ────────────────────────────────────────────
+// ─── Security Headers (Helmet) ────────────────────────────────────────────────
+app.use(helmet({
+  crossOriginEmbedderPolicy: false, // Allow Socket.io
+  contentSecurityPolicy: env.NODE_ENV === 'production' ? undefined : false,
+}))
 
+// ─── CORS ─────────────────────────────────────────────────────────────────────
 app.use(
   cors({
     origin: env.CLIENT_ORIGIN.split(',').map((o) => o.trim()),
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 )
 
-app.use(express.json({ limit: '10mb' }))
-app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+// ─── Rate Limiting ────────────────────────────────────────────────────────────
+
+/** Strict limiter for auth endpoints — prevent brute-force */
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 min
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { status: 'error', message: 'Too many requests, please try again later' },
+})
+
+/** General API limiter */
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { status: 'error', message: 'Too many requests, please try again later' },
+})
+
+// ─── Body Parsers ─────────────────────────────────────────────────────────────
+// JSON limit is 2mb (file uploads go through multipart, not JSON)
+app.use(express.json({ limit: '2mb' }))
+app.use(express.urlencoded({ extended: true, limit: '2mb' }))
+
+// ─── Apply Limiters ───────────────────────────────────────────────────────────
+app.use('/api/auth', authLimiter)
+app.use('/api/', apiLimiter)
 
 // ─── Routes ──────────────────────────────────────────────────────────────────
-
 app.use('/api/health', healthRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/profile', profileRoutes)
@@ -50,13 +84,11 @@ app.use('/api/matching', matchingRoutes)
 app.use('/api/search', searchRoutes)
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
-
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ status: 'error', message: 'Route not found' })
 })
 
 // ─── Global Error Handler ────────────────────────────────────────────────────
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('[Error]', err.stack)

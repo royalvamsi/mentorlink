@@ -1,4 +1,4 @@
-﻿import Profile from '../models/Profile'
+import Profile from '../models/Profile'
 import User from '../models/User'
 import { Types } from 'mongoose'
 
@@ -28,6 +28,11 @@ export interface MentorListing {
   }
 }
 
+/** Escape all regex special chars to prevent ReDoS injection */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 export async function getMentors(filter: MentorFilter): Promise<{ mentors: MentorListing[]; total: number; page: number; totalPages: number }> {
   const page = Math.max(1, filter.page ?? 1)
   const limit = Math.min(20, Math.max(1, filter.limit ?? 12))
@@ -36,7 +41,8 @@ export async function getMentors(filter: MentorFilter): Promise<{ mentors: Mento
   // Find SENIOR and ALUMNI users matching optional search
   const userQuery: Record<string, unknown> = { role: { $in: ['SENIOR', 'ALUMNI'] } }
   if (filter.search) {
-    const regex = new RegExp(filter.search, 'i')
+    const safeSearch = escapeRegex(filter.search.trim())
+    const regex = new RegExp(safeSearch, 'i')
     userQuery['$or'] = [{ name: regex }, { email: regex }]
   }
 
@@ -82,6 +88,11 @@ export async function getMentors(filter: MentorFilter): Promise<{ mentors: Mento
 }
 
 export async function getMentorById(userId: string): Promise<MentorListing> {
+  if (!Types.ObjectId.isValid(userId)) {
+    const e = new Error('Invalid mentor ID') as Error & { statusCode: number }
+    e.statusCode = 400
+    throw e
+  }
   const user = await User.findById(userId).select('_id name role')
   if (!user || !['SENIOR', 'ALUMNI'].includes(user.role)) {
     const e = new Error('Mentor not found') as Error & { statusCode: number }

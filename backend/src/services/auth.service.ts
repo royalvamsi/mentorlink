@@ -70,11 +70,12 @@ export async function registerUser(
     throw new AuthServiceError(400, 'Password must be at least 8 characters')
   }
 
-  // — Validate role
-  if (!USER_ROLES.includes(role)) {
+  // — Validate role (ADMIN cannot be self-registered — must be assigned via admin panel)
+  const REGISTERABLE_ROLES = USER_ROLES.filter(r => r !== 'ADMIN')
+  if (!REGISTERABLE_ROLES.includes(role as typeof REGISTERABLE_ROLES[number])) {
     throw new AuthServiceError(
       400,
-      `Role must be one of: ${USER_ROLES.join(', ')}`
+      `Role must be one of: ${REGISTERABLE_ROLES.join(', ')}`
     )
   }
 

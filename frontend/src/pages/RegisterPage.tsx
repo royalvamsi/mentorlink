@@ -1,10 +1,10 @@
-﻿import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import type { UserRole } from '../types/auth'
+import type { RegisterRole } from '../types/auth'
 import axios from 'axios'
 
-const ROLES: { value: UserRole; label: string; desc: string }[] = [
+const ROLES: { value: RegisterRole; label: string; desc: string }[] = [
   { value: 'JUNIOR', label: 'Junior Student', desc: 'Looking for guidance and mentorship' },
   { value: 'SENIOR', label: 'Senior Student', desc: 'Ready to mentor juniors in my field' },
   { value: 'ALUMNI', label: 'Alumni', desc: 'Offering professional industry mentorship' },
@@ -17,7 +17,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState<UserRole>('JUNIOR')
+  const [role, setRole] = useState<RegisterRole>('JUNIOR')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { forumService, type Post, type Comment, CATEGORIES } from '../services/forumService'
+import { forumService, type Post, type Comment } from '../services/forumService'
 import axios from 'axios'
 
 function fmt(d: string) { return new Date(d).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) }
@@ -111,9 +111,24 @@ export default function PostPage() {
               <span>👁 {post.viewCount}</span>
               <span>💬 {post.commentCount}</span>
             </div>
-            <button onClick={handleUpvote} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${hasUpvoted ? 'bg-indigo-600/30 text-indigo-300' : 'bg-slate-800 text-slate-400 hover:text-white'}`}>
-              ⬆ {post.upvotes.length}
-            </button>
+            <div className="flex items-center gap-2">
+              {(isAuthor || user?.role === 'ADMIN') && (
+                <button
+                  onClick={async () => {
+                    if (window.confirm('Delete this post?')) {
+                      await forumService.deletePost(post._id)
+                      window.location.href = '/forum'
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition"
+                >
+                  Delete Post
+                </button>
+              )}
+              <button onClick={handleUpvote} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${hasUpvoted ? 'bg-indigo-600/30 text-indigo-300' : 'bg-slate-800 text-slate-400 hover:text-white'}`}>
+                ⬆ {post.upvotes.length}
+              </button>
+            </div>
           </div>
         </article>
 

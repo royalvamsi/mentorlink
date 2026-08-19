@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { useSocket } from '../context/SocketContext'
 import { NotificationBell } from '../components/NotificationBell'
 import { searchService, type SearchResult, type SearchType } from '../services/searchService'
 
@@ -58,8 +57,7 @@ function ResultCard({ result }: { result: SearchResult }) {
 }
 
 export default function SearchPage() {
-  const { user, logout } = useAuth()
-  const { unreadCount } = useSocket()
+  const { logout } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const initialQ = searchParams.get('q') ?? ''
@@ -69,7 +67,6 @@ export default function SearchPage() {
   const [activeType, setActiveType] = useState<SearchType>(initialType)
   const [results, setResults] = useState<SearchResult[]>([])
   const [total, setTotal] = useState(0)
-  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
 
@@ -92,14 +89,12 @@ export default function SearchPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setPage(1)
     setSearchParams({ q: query, type: activeType })
     doSearch(query, activeType, 1)
   }
 
   function handleTypeChange(t: SearchType) {
     setActiveType(t)
-    setPage(1)
     if (query.trim()) {
       setSearchParams({ q: query, type: t })
       doSearch(query, t, 1)

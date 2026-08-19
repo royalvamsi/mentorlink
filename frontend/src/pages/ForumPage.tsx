@@ -16,7 +16,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 function fmt(d: string) { return new Date(d).toLocaleDateString([], { dateStyle: 'medium' }) }
 
 export default function ForumPage() {
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
   const navigate = useNavigate()
   const [posts, setPosts] = useState<Post[]>([])
   const [total, setTotal] = useState(0)

@@ -4,6 +4,11 @@ import { Post, Comment } from '../models/Forum'
 import { Types } from 'mongoose'
 import type { ReportTargetType, ReportReason, ReportStatus } from '../models/Report'
 
+/** Escape regex special chars to prevent ReDoS injection */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 export class AdminError extends Error {
   constructor(public readonly statusCode: number, message: string) {
     super(message); this.name = 'AdminError'
@@ -69,7 +74,10 @@ export async function resolveReport(
 
 export async function listUsers(page = 1, pageSize = 30, search?: string) {
   const filter: Record<string, unknown> = {}
-  if (search) filter['$or'] = [{ name: { $regex: search, $options: 'i' } }, { email: { $regex: search, $options: 'i' } }]
+  if (search) {
+    const safeSearch = escapeRegex(search)
+    filter['$or'] = [{ name: { $regex: safeSearch, $options: 'i' } }, { email: { $regex: safeSearch, $options: 'i' } }]
+  }
   const skip = (page - 1) * pageSize
   const [users, total] = await Promise.all([
     User.find(filter).select('-password').sort({ createdAt: -1 }).skip(skip).limit(pageSize).lean(),

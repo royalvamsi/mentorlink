@@ -24,7 +24,7 @@ export interface SearchResult {
   subtitle?: string
   link: string
   tags?: string[]
-  score?: number   // reserved for future ranking
+  score?: number
 }
 
 export interface SearchResponse {
@@ -32,6 +32,11 @@ export interface SearchResponse {
   total: number
   query: string
   type: SearchType
+}
+
+/** Escape all regex special chars to prevent ReDoS injection */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 export async function globalSearch(
@@ -44,7 +49,9 @@ export async function globalSearch(
   query = (query ?? '').trim()
   if (query.length < 2) return { results: [], total: 0, query, type }
 
-  const regex = { $regex: query, $options: 'i' }
+  // Sanitize before passing to MongoDB regex to prevent ReDoS
+  const safeQuery = escapeRegex(query)
+  const regex = { $regex: safeQuery, $options: 'i' }
   const results: SearchResult[] = []
 
   // ─── Mentors / Users ────────────────────────────────────────────────────────
@@ -92,7 +99,7 @@ export async function globalSearch(
   // ─── Forum Posts ─────────────────────────────────────────────────────────────
   if (type === 'all' || type === 'posts') {
     const posts = await Post.find({
-      $or: [{ title: regex }, { content: regex }, { tags: regex }],
+      $or: [{ title: regex }, { body: regex }, { tags: regex }],
     })
       .select('title authorId tags createdAt')
       .populate('authorId', 'name')

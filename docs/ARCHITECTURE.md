@@ -1,6 +1,6 @@
 # MentorLink — Architecture
 
-> Updated as the project is built. This document reflects the current state of the codebase.
+> Complete technical architecture of MentorLink (Phases 1–17).
 
 ---
 
@@ -9,21 +9,21 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                        CLIENT                           │
-│         React + TypeScript + Vite + Tailwind CSS        │
+│         React 19 + TypeScript + Vite + Tailwind CSS     │
 │                   (Vercel / localhost)                  │
 └──────────────────────┬──────────────────────────────────┘
                        │ HTTPS / WSS
 ┌──────────────────────▼──────────────────────────────────┐
 │                       SERVER                            │
-│          Node.js + Express + TypeScript                 │
-│                   (Render / Railway)                    │
+│          Node.js + Express 5 + TypeScript               │
+│               + Socket.io + Helmet                      │
 │                                                         │
 │  ┌──────────────┐   ┌──────────────┐  ┌─────────────┐  │
-│  │   REST API   │   │  Socket.io   │  │  File svc   │  │
-│  │  /api/*      │   │  (Phase 5)   │  │  (Phase 8)  │  │
+│  │   REST API   │   │  Socket.io   │  │ File Storage│  │
+│  │  /api/*      │   │  Real-time   │  │   Multer    │  │
 │  └──────────────┘   └──────────────┘  └─────────────┘  │
 └──────────────────────┬──────────────────────────────────┘
-                       │ Mongoose
+                       │ Mongoose 9
 ┌──────────────────────▼──────────────────────────────────┐
 │                   MongoDB Atlas                         │
 │                  (managed cloud DB)                     │
@@ -32,124 +32,46 @@
 
 ---
 
-## 2. Folder Structure
+## 2. API Routes & Security Structure
 
-### Frontend (`frontend/`)
-
-```
-frontend/
-├── public/
-└── src/
-    ├── assets/          # Static images, icons, fonts
-    ├── components/      # Shared, reusable UI components
-    ├── context/         # React Context providers
-    ├── hooks/           # Custom React hooks
-    ├── layouts/         # Page layout wrappers
-    ├── pages/           # Route-level page components
-    ├── services/        # Axios API call modules
-    ├── types/           # Shared TypeScript type definitions
-    ├── utils/           # Pure utility functions
-    ├── App.tsx          # Root component, routing
-    ├── main.tsx         # React entry point
-    └── index.css        # Tailwind base + global styles
-```
-
-### Backend (`backend/`)
-
-```
-backend/
-└── src/
-    ├── config/          # Environment loading, DB connection
-    ├── controllers/     # Request handlers (thin, delegates to service)
-    ├── middleware/       # Auth, error handler, rate limiter, validation
-    ├── models/          # Mongoose schema + model definitions
-    ├── routes/          # Express routers
-    ├── services/        # Business logic
-    ├── types/           # Shared TypeScript types and interfaces
-    ├── utils/           # Utility functions (logger, response helpers)
-    ├── app.ts           # Express app setup
-    └── server.ts        # Server entry point
-```
+| Route Prefix         | Description                                | Auth / Security Middleware |
+|----------------------|--------------------------------------------|----------------------------|
+| `/api/health`        | Health check                               | Public                     |
+| `/api/auth`          | Register, login, me                        | Public / verifyToken, Rate Limited (20/15min) |
+| `/api/profile`       | User profile CRUD                          | `verifyToken`              |
+| `/api/mentors`       | Mentor search & details                    | `verifyToken`              |
+| `/api/mentorships`   | Requests, accept/reject, active            | `verifyToken` + Participant Checks |
+| `/api/chat`          | 1-on-1 conversations & messages            | `verifyToken` + Participant Checks |
+| `/api/scheduling`    | Availability & session bookings            | `verifyToken` + `authorizeRoles` + Owner Checks |
+| `/api/feedback`      | Ratings & reviews                          | `verifyToken` + Booking Participant Check |
+| `/api/files`         | File sharing & downloads                   | `verifyToken` + File Access Verification |
+| `/api/forum`         | Posts, comments, upvotes                   | `verifyToken` + Author / Admin Check |
+| `/api/goals`         | Goal tracking & milestones                 | `verifyToken` + Owner / Mentorship Check |
+| `/api/notifications` | In-app notifications                       | `verifyToken` + Scoped to User |
+| `/api/admin`         | Moderation, user roles, stats              | `verifyToken` + `requireAdmin` |
+| `/api/matching`      | Smart mentor recommendations               | `verifyToken`              |
+| `/api/search`        | Global multi-entity search                 | `verifyToken` + Scoped Goal Search |
 
 ---
 
-## 3. API Namespace
+## 3. Security Hardening Layers
 
-| Prefix              | Description                    | Status      |
-|---------------------|--------------------------------|-------------|
-| `/api/health`       | Health check                   | ✅ Phase 1  |
-| `/api/auth`         | Registration, login, logout    | Phase 2     |
-| `/api/users`        | User account management        | Phase 2     |
-| `/api/profiles`     | Profile CRUD                   | Phase 3     |
-| `/api/mentors`      | Mentor search and discovery    | Phase 4     |
-| `/api/mentorships`  | Mentorship relationships       | Phase 4     |
-| `/api/conversations`| Chat conversations             | Phase 5     |
-| `/api/messages`     | Chat messages                  | Phase 5     |
-| `/api/availability` | Mentor availability slots      | Phase 6     |
-| `/api/bookings`     | Session bookings               | Phase 6     |
-| `/api/feedback`     | Ratings and feedback           | Phase 7     |
-| `/api/files`        | File upload and download       | Phase 8     |
-| `/api/forums`       | Community topics               | Phase 9     |
-| `/api/goals`        | Goal tracking                  | Phase 10    |
-| `/api/notifications`| Notifications                  | Phase 11    |
-| `/api/admin`        | Admin moderation               | Phase 12    |
-
----
-
-## 4. Authentication Flow (Phase 2 — planned)
-
-```
-Client                         Server
-  │── POST /api/auth/register ──▶ │  Validate → hash password → save User
-  │◀── { token, user } ──────────│
-  │                               │
-  │── POST /api/auth/login ──────▶│  Verify credentials → sign JWT
-  │◀── { token, user } ──────────│
-  │                               │
-  │── GET /api/protected ────────▶│  verifyToken middleware → authorize
-  │◀── { data } ─────────────────│
-```
-
----
-
-## 5. Real-time Architecture (Phase 5 — planned)
-
-Socket.io will be mounted on the same HTTP server as Express.
-
-Events planned:
-
-| Event             | Direction       | Description              |
-|-------------------|-----------------|--------------------------|
-| `join_room`       | Client → Server | Join a conversation room |
-| `send_message`    | Client → Server | Send a chat message      |
-| `receive_message` | Server → Client | Deliver a message        |
-| `typing`          | Client → Server | Typing indicator         |
-| `stop_typing`     | Client → Server | Stop typing indicator    |
-| `user_online`     | Server → Client | User came online         |
-| `user_offline`    | Server → Client | User went offline        |
-
----
-
-## 6. Database Models (planned)
-
-> Models are created when the corresponding feature is implemented.
-
-| Model               | Phase |
-|---------------------|-------|
-| `User`              | 2     |
-| `Profile`           | 3     |
-| `Mentorship`        | 4     |
-| `MentorshipRequest` | 4     |
-| `Conversation`      | 5     |
-| `Message`           | 5     |
-| `Availability`      | 6     |
-| `Booking`           | 6     |
-| `Feedback`          | 7     |
-| `File`              | 8     |
-| `Forum`             | 9     |
-| `Post`              | 9     |
-| `Comment`           | 9     |
-| `Goal`              | 10    |
-| `Milestone`         | 10    |
-| `Notification`      | 11    |
-| `Report`            | 12    |
+1. **HTTP Headers**: Helmet enabled with custom CSP and cross-origin embedder policy for real-time WebSocket compatibility.
+2. **Rate Limiting**:
+   - `authLimiter`: 20 requests per 15 minutes to prevent brute-force on `/api/auth`.
+   - `apiLimiter`: 300 requests per 15 minutes for general API endpoints.
+3. **Payload Protection**: Express JSON and URL-encoded body parsers capped at 2MB.
+4. **ReDoS & Regex Injection Defense**: All user-controlled regex queries sanitized with `escapeRegex()` before query execution in MongoDB.
+5. **Role-Based Access Control**:
+   - `USER_ROLES`: `JUNIOR`, `SENIOR`, `ALUMNI`, `ADMIN`
+   - Public registration strictly restricts role to `['JUNIOR', 'SENIOR', 'ALUMNI']` (privilege escalation prevention).
+   - `requireAdmin` guard on all administrative routes.
+   - `authorizeRoles` guard on availability slot creation (`SENIOR`, `ALUMNI`, `ADMIN`).
+6. **Object-Level & Resource Ownership**:
+   - File downloads restricted to uploader, mentorship participants, or conversation participants.
+   - Bookings, goals, and conversations verified against requesting user's identity.
+   - Forum post/comment deletion restricted to author or administrator.
+7. **Socket.io Authentication**:
+   - Handshake JWT verification required before connection.
+   - Room joins and message sends verified against conversation membership.
+   - Targeted private notification rooms (`user:<userId>`).

@@ -1,25 +1,52 @@
 import Goal from '../models/Goal'
+import Mentorship from '../models/Mentorship'
 import { Types } from 'mongoose'
 import type { GoalStatus, IMilestone } from '../models/Goal'
 
 export class GoalError extends Error {
   constructor(public readonly statusCode: number, message: string) {
-    super(message); this.name = 'GoalError'
+    super(message)
+    this.name = 'GoalError'
   }
 }
 
 function computeProgress(milestones: IMilestone[]): number {
   if (!milestones.length) return 0
-  return Math.round((milestones.filter(m => m.completed).length / milestones.length) * 100)
+  return Math.round((milestones.filter((m) => m.completed).length / milestones.length) * 100)
 }
 
 export async function createGoal(
   userId: string,
-  data: { title: string; description?: string; targetDate?: string; milestones?: { title: string; dueDate?: string }[]; tags?: string[]; mentorshipId?: string }
+  data: {
+    title: string
+    description?: string
+    targetDate?: string
+    milestones?: { title: string; dueDate?: string }[]
+    tags?: string[]
+    mentorshipId?: string
+  }
 ) {
-  const milestones = (data.milestones ?? []).map(m => ({
-    title: m.title, completed: false, dueDate: m.dueDate ? new Date(m.dueDate) : undefined,
+  if (data.mentorshipId) {
+    if (!Types.ObjectId.isValid(data.mentorshipId)) {
+      throw new GoalError(400, 'Invalid mentorship ID')
+    }
+    const mentorship = await Mentorship.findById(data.mentorshipId).lean()
+    if (!mentorship) {
+      throw new GoalError(404, 'Mentorship not found')
+    }
+    const isMember =
+      mentorship.mentorId.toString() === userId || mentorship.menteeId.toString() === userId
+    if (!isMember) {
+      throw new GoalError(403, 'You are not a member of this mentorship')
+    }
+  }
+
+  const milestones = (data.milestones ?? []).map((m) => ({
+    title: m.title,
+    completed: false,
+    dueDate: m.dueDate ? new Date(m.dueDate) : undefined,
   }))
+
   return Goal.create({
     userId: new Types.ObjectId(userId),
     mentorshipId: data.mentorshipId ? new Types.ObjectId(data.mentorshipId) : undefined,
@@ -39,13 +66,23 @@ export async function getGoals(userId: string, status?: string) {
 }
 
 export async function getGoalById(id: string, userId: string) {
+  if (!Types.ObjectId.isValid(id)) {
+    throw new GoalError(400, 'Invalid goal ID')
+  }
   const goal = await Goal.findById(id).lean()
   if (!goal) throw new GoalError(404, 'Goal not found')
   if (goal.userId.toString() !== userId) throw new GoalError(403, 'Access denied')
   return goal
 }
 
-export async function updateGoal(id: string, userId: string, data: { title?: string; description?: string; status?: string; targetDate?: string; tags?: string[] }) {
+export async function updateGoal(
+  id: string,
+  userId: string,
+  data: { title?: string; description?: string; status?: string; targetDate?: string; tags?: string[] }
+) {
+  if (!Types.ObjectId.isValid(id)) {
+    throw new GoalError(400, 'Invalid goal ID')
+  }
   const goal = await Goal.findById(id)
   if (!goal) throw new GoalError(404, 'Goal not found')
   if (goal.userId.toString() !== userId) throw new GoalError(403, 'Access denied')
@@ -62,16 +99,19 @@ export async function updateGoal(id: string, userId: string, data: { title?: str
 }
 
 export async function toggleMilestone(goalId: string, milestoneId: string, userId: string) {
+  if (!Types.ObjectId.isValid(goalId)) {
+    throw new GoalError(400, 'Invalid goal ID')
+  }
   const goal = await Goal.findById(goalId)
   if (!goal) throw new GoalError(404, 'Goal not found')
   if (goal.userId.toString() !== userId) throw new GoalError(403, 'Access denied')
-  const ms = goal.milestones.find(m => String(m._id) === milestoneId)
+  const ms = goal.milestones.find((m) => String(m._id) === milestoneId)
   if (!ms) throw new GoalError(404, 'Milestone not found')
   ms.completed = !ms.completed
   ms.completedAt = ms.completed ? new Date() : undefined
   goal.progress = computeProgress(goal.milestones)
   // Auto-complete goal if all milestones done
-  if (goal.milestones.length > 0 && goal.milestones.every(m => m.completed)) {
+  if (goal.milestones.length > 0 && goal.milestones.every((m) => m.completed)) {
     goal.status = 'COMPLETED'
     goal.completedAt = new Date()
   }
@@ -80,6 +120,9 @@ export async function toggleMilestone(goalId: string, milestoneId: string, userI
 }
 
 export async function addMilestone(goalId: string, userId: string, title: string, dueDate?: string) {
+  if (!Types.ObjectId.isValid(goalId)) {
+    throw new GoalError(400, 'Invalid goal ID')
+  }
   const goal = await Goal.findById(goalId)
   if (!goal) throw new GoalError(404, 'Goal not found')
   if (goal.userId.toString() !== userId) throw new GoalError(403, 'Access denied')
@@ -90,6 +133,9 @@ export async function addMilestone(goalId: string, userId: string, title: string
 }
 
 export async function deleteGoal(id: string, userId: string) {
+  if (!Types.ObjectId.isValid(id)) {
+    throw new GoalError(400, 'Invalid goal ID')
+  }
   const goal = await Goal.findById(id)
   if (!goal) throw new GoalError(404, 'Goal not found')
   if (goal.userId.toString() !== userId) throw new GoalError(403, 'Access denied')

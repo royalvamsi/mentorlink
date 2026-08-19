@@ -1,6 +1,7 @@
 // --- User / Role -------------------------------------------------------------
 
-export type UserRole = 'JUNIOR' | 'SENIOR' | 'ALUMNI'
+export type UserRole = 'JUNIOR' | 'SENIOR' | 'ALUMNI' | 'ADMIN'
+export type RegisterRole = 'JUNIOR' | 'SENIOR' | 'ALUMNI'
 
 export interface User {
   id: string
@@ -25,7 +26,7 @@ export interface RegisterData {
   name: string
   email: string
   password: string
-  role: UserRole
+  role: RegisterRole
 }
 
 export interface LoginData {

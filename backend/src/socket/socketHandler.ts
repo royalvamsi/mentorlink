@@ -125,6 +125,11 @@ export function initSocket(httpServer: HttpServer) {
     socket.on('mark_read', async (conversationId: string) => {
       try {
         if (!conversationId || !Types.ObjectId.isValid(conversationId)) return
+        // Verify membership before allowing mark-read (authorization check)
+        const conv = await Conversation.findById(conversationId)
+        if (!conv) return
+        const isMember = conv.participants.some((p) => p.toString() === userId)
+        if (!isMember) return
         await markRead(conversationId, userId)
         socket.to(conversationId).emit('messages_read', { conversationId, userId })
       } catch { /* ignore */ }

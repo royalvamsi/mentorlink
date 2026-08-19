@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { schedulingService, type AvailabilitySlot } from '../services/schedulingService'
-import { mentorService } from '../services/mentorService'
+import { mentorService, type MentorProfile } from '../services/mentorService'
 import axios from 'axios'
 
 function fmt(d: string) {
@@ -17,7 +17,7 @@ export default function BookSessionPage() {
   const { mentorId } = useParams<{ mentorId: string }>()
   const navigate = useNavigate()
 
-  const [mentor, setMentor] = useState<{ name: string; role: string; profile: { department: string } } | null>(null)
+  const [mentor, setMentor] = useState<MentorProfile | null>(null)
   const [slots, setSlots] = useState<AvailabilitySlot[]>([])
   const [selected, setSelected] = useState<AvailabilitySlot | null>(null)
   const [notes, setNotes] = useState('')

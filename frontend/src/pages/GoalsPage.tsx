@@ -29,7 +29,7 @@ function ProgressBar({ value }: { value: number }) {
 function fmt(d: string) { return new Date(d).toLocaleDateString([], { dateStyle: 'medium' }) }
 
 export default function GoalsPage() {
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
   const [goals, setGoals] = useState<Goal[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
