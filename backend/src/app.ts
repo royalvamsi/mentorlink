@@ -14,6 +14,7 @@ import forumRoutes from './routes/forumRoutes'
 import goalRoutes from './routes/goalRoutes'
 import notificationRoutes from './routes/notificationRoutes'
 import adminRoutes from './routes/adminRoutes'
+import matchingRoutes from './routes/matchingRoutes'
 
 const app: Application = express()
 
@@ -44,6 +45,7 @@ app.use('/api/forum', forumRoutes)
 app.use('/api/goals', goalRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/matching', matchingRoutes)
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 

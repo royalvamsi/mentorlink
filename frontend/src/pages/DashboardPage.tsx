@@ -1,6 +1,7 @@
 import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 import { NotificationBell } from '../components/NotificationBell'
+import { RecommendedMentors } from '../components/RecommendedMentors'
 
 const ROLE_CONFIG = {
   JUNIOR: {
@@ -105,14 +106,28 @@ export default function DashboardPage() {
               <h3 className="font-semibold text-indigo-300 mb-1">Complete your profile</h3>
               <p className="text-sm text-slate-400">Add your skills, bio, and interests to help others find you.</p>
             </div>
-            <Link
-              to="/profile/edit"
-              className="shrink-0 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition"
-            >
+            <Link to="/profile/edit" className="shrink-0 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition">
               Edit profile
             </Link>
           </div>
         </div>
+
+        {/* Smart recommendations for juniors */}
+        {user.role === 'JUNIOR' && (
+          <div className="mt-8">
+            <h2 className="text-slate-400 text-sm font-medium uppercase tracking-wider mb-4">Recommended for you</h2>
+            <RecommendedMentors />
+          </div>
+        )}
+
+        {/* Admin link */}
+        {user.role === 'ADMIN' && (
+          <div className="mt-6">
+            <Link to="/admin" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/30 text-red-300 hover:bg-red-500/30 text-sm font-medium transition">
+              🛡️ Admin Dashboard
+            </Link>
+          </div>
+        )}
       </main>
     </div>
   )
