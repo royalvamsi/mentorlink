@@ -2,6 +2,7 @@ import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 import { NotificationBell } from '../components/NotificationBell'
 import { RecommendedMentors } from '../components/RecommendedMentors'
+import { GlobalSearchBar } from '../components/GlobalSearchBar'
 
 const ROLE_CONFIG = {
   JUNIOR: {
@@ -43,21 +44,24 @@ export default function DashboardPage() {
   const { user, logout } = useAuth()
   if (!user) return null
 
-  const config = ROLE_CONFIG[user.role]
+  // ADMIN users get SENIOR config as fallback
+  const config = ROLE_CONFIG[user.role as keyof typeof ROLE_CONFIG] ?? ROLE_CONFIG['SENIOR']
 
   return (
     <div className="min-h-screen bg-slate-950">
-      {/* Nav */}
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <header className="border-b border-slate-800 px-6 py-3 flex items-center gap-4">
+        <Link to="/dashboard" className="flex items-center gap-2.5 shrink-0">
           <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4 6v-2m0 0a4 4 0 10-4-4 4 4 0 004 4zm0 0a4 4 0 104 4 4 4 0 00-4-4z" />
             </svg>
           </div>
-          <span className="font-bold text-white text-lg">MentorLink</span>
+          <span className="font-bold text-white text-lg hidden sm:block">MentorLink</span>
+        </Link>
+        <div className="flex-1 max-w-sm hidden md:block">
+          <GlobalSearchBar />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 ml-auto">
           <NotificationBell />
           <Link to="/profile" className="text-sm text-slate-300 hover:text-white transition">
             {user.name}

@@ -15,6 +15,7 @@ import goalRoutes from './routes/goalRoutes'
 import notificationRoutes from './routes/notificationRoutes'
 import adminRoutes from './routes/adminRoutes'
 import matchingRoutes from './routes/matchingRoutes'
+import searchRoutes from './routes/searchRoutes'
 
 const app: Application = express()
 
@@ -46,6 +47,7 @@ app.use('/api/goals', goalRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/matching', matchingRoutes)
+app.use('/api/search', searchRoutes)
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 
