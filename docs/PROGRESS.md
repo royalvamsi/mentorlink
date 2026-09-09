@@ -130,8 +130,28 @@
   - Clean TypeScript compilation on backend (`npx tsc --noEmit`) and frontend (`npm run build`).
   - 100% test pass rate across all 64 automated backend and frontend test cases.
 
+### Phase 20 — Password Recovery (Forgot & Reset Password)
+- **Database & Model**:
+  - Added `passwordResetToken` (hashed SHA-256 string, `select: false`) and `passwordResetExpires` (Date, `select: false`) to `User` Mongoose schema and `IUser` interface.
+- **Backend API & Security**:
+  - `POST /api/auth/forgot-password`: Generates a cryptographically secure 32-byte hex token, hashes with SHA-256 for storage with 15-minute expiry, and provides a development preview link. Returns generic success message to mitigate user enumeration attacks.
+  - `POST /api/auth/reset-password`: Validates incoming reset token, verifies expiration, validates new password (>= 8 characters), updates password with bcrypt hashing, and invalidates the token to prevent replay attacks.
+  - Inherits strict `authLimiter` (20 requests / 15 minutes) on `/api/auth` namespace.
+- **Frontend Pages & Services**:
+  - Added `forgotPassword` and `resetPassword` to `authService.ts`.
+  - Added "Forgot password?" link adjacent to the Password field on `LoginPage.tsx`.
+  - Created `ForgotPasswordPage.tsx` with email submission and local development quick-link helper.
+  - Created `ResetPasswordPage.tsx` with auto-detected `?token=` query parameter, show/hide password toggle, validation, and redirection to sign in.
+  - Registered `/forgot-password` and `/reset-password` under `PublicOnlyRoute` in `App.tsx`.
+- **Automated Testing**:
+  - Backend tests in `auth.test.ts` for cryptographic token generation, SHA-256 deterministic hashing, and 15-minute expiration calculation.
+  - Backend integration tests in `api_integration.test.ts` for input validation and error rejection on `/api/auth/forgot-password` and `/api/auth/reset-password`.
+  - Frontend unit tests in `auth.test.ts` for password length and match confirmation rules.
+  - 100% test pass rate across 71 automated tests (61 backend + 10 frontend).
+
 ---
 
 ## 🔄 Next Phase
 
-**Phase 20 — Performance Optimization**
+**Phase 21 — Performance Optimization**
+

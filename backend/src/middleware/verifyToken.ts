@@ -33,16 +33,23 @@ export function verifyToken(
   res: Response,
   next: NextFunction
 ): void {
+  // Prefer Authorization header; fall back to ?token= query param (used for
+  // file-download links opened via window.open / new browser tabs).
   const authHeader = req.headers.authorization
+  let token: string | undefined
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1]
+  } else if (req.query && typeof req.query['token'] === 'string' && req.query['token']) {
+    token = req.query['token'] as string
+  }
+
+  if (!token) {
     res
       .status(401)
       .json({ status: 'error', message: 'Authentication token required' })
     return
   }
-
-  const token = authHeader.split(' ')[1]
 
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayload

@@ -2,6 +2,7 @@ import { Server as HttpServer } from 'http'
 import { Server as SocketServer, Socket } from 'socket.io'
 import jwt from 'jsonwebtoken'
 import { env } from '../config/env'
+import { isOriginAllowed } from '../config/cors'
 import { JwtPayload } from '../types/auth.types'
 import { saveMessage, markRead } from '../services/chat.service'
 import { setIo } from '../services/notification.service'
@@ -14,7 +15,13 @@ const onlineUsers = new Map<string, Set<string>>()
 export function initSocket(httpServer: HttpServer) {
   const io = new SocketServer(httpServer, {
     cors: {
-      origin: env.CLIENT_ORIGIN.split(',').map((o) => o.trim()),
+      origin: (origin, callback) => {
+        if (isOriginAllowed(origin)) {
+          callback(null, true)
+        } else {
+          callback(new Error('Socket CORS blocked origin'))
+        }
+      },
       credentials: true,
     },
   })

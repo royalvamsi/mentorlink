@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback, type ReactNode } from 'react'
 import { io, type Socket } from 'socket.io-client'
 import { useAuth } from './AuthContext'
-import type { NotificationItem } from '../services/notificationService'
+import { notificationService, type NotificationItem } from '../services/notificationService'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000'
 
@@ -41,9 +41,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   // Seed unread count from REST API on login
   useEffect(() => {
     if (!isAuthenticated || !token) { setUnreadCount(0); return }
-    import('../services/notificationService').then(({ notificationService }) => {
-      notificationService.getAll().then(data => setUnreadCount(data.unreadCount)).catch(() => {})
-    })
+    notificationService.getAll().then(data => setUnreadCount(data.unreadCount)).catch(() => {})
   }, [isAuthenticated, token])
 
   useEffect(() => {
@@ -63,15 +61,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       reconnectionAttempts: 10,
     })
 
-    socket.on('connect', () => setIsConnected(true))
-    socket.on('disconnect', () => setIsConnected(false))
-
-    // On reconnect, re-sync unread count to catch anything missed while offline
     socket.on('connect', () => {
-      import('../services/notificationService').then(({ notificationService }) => {
-        notificationService.getAll().then(data => setUnreadCount(data.unreadCount)).catch(() => {})
-      })
+      setIsConnected(true)
+      // Re-sync unread count on connect/reconnect to catch anything missed while offline
+      notificationService.getAll().then(data => setUnreadCount(data.unreadCount)).catch(() => {})
     })
+    socket.on('disconnect', () => setIsConnected(false))
 
     socket.on('online_users', (users: string[]) => {
       if (Array.isArray(users)) setOnlineUsers(users)

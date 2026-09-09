@@ -111,6 +111,44 @@ describe('Phase 18 — API Integration & Security Boundary Tests', () => {
     })
   })
 
+  describe('Password Reset Security Validation', () => {
+    it('POST /api/auth/forgot-password — should reject missing email with 400', async () => {
+      const res = await request(app)
+        .post('/api/auth/forgot-password')
+        .send({})
+
+      assert.equal(res.status, 400)
+      assert.equal(res.body.message, 'email is required')
+    })
+
+    it('POST /api/auth/forgot-password — should reject invalid email format with 400', async () => {
+      const res = await request(app)
+        .post('/api/auth/forgot-password')
+        .send({ email: 'bad-email' })
+
+      assert.equal(res.status, 400)
+      assert.equal(res.body.message, 'Invalid email format')
+    })
+
+    it('POST /api/auth/reset-password — should reject missing token or password with 400', async () => {
+      const res = await request(app)
+        .post('/api/auth/reset-password')
+        .send({ token: 'abc' })
+
+      assert.equal(res.status, 400)
+      assert.equal(res.body.message, 'token and password are required')
+    })
+
+    it('POST /api/auth/reset-password — should reject password shorter than 8 characters', async () => {
+      const res = await request(app)
+        .post('/api/auth/reset-password')
+        .send({ token: 'sample-token', password: 'short' })
+
+      assert.equal(res.status, 400)
+      assert.equal(res.body.message, 'Password must be at least 8 characters')
+    })
+  })
+
   describe('Security Headers (Helmet)', () => {
     it('should include standard security response headers', async () => {
       const res = await request(app).get('/api/health')
@@ -119,3 +157,4 @@ describe('Phase 18 — API Integration & Security Boundary Tests', () => {
     })
   })
 })
+

@@ -1,6 +1,18 @@
 import { Request, Response, NextFunction } from 'express'
-import { registerUser, loginUser, getMeUser, AuthServiceError } from '../services/auth.service'
-import { RegisterRequestBody, LoginRequestBody } from '../types/auth.types'
+import {
+  registerUser,
+  loginUser,
+  getMeUser,
+  forgotPasswordUser,
+  resetPasswordUser,
+  AuthServiceError,
+} from '../services/auth.service'
+import {
+  RegisterRequestBody,
+  LoginRequestBody,
+  ForgotPasswordRequestBody,
+  ResetPasswordRequestBody,
+} from '../types/auth.types'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -84,3 +96,51 @@ export async function getMe(
     handleError(err, res, next)
   }
 }
+
+// ─── Forgot Password ─────────────────────────────────────────────────────────
+
+/**
+ * POST /api/auth/forgot-password
+ *
+ * Generates a password reset token and dispatches reset instructions.
+ */
+export async function forgotPassword(
+  req: Request<object, object, ForgotPasswordRequestBody>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const result = await forgotPasswordUser(req.body)
+    res.status(200).json({
+      status: 'success',
+      message: result.message,
+      data: result,
+    })
+  } catch (err) {
+    handleError(err, res, next)
+  }
+}
+
+// ─── Reset Password ──────────────────────────────────────────────────────────
+
+/**
+ * POST /api/auth/reset-password
+ *
+ * Validates token and resets user password.
+ */
+export async function resetPassword(
+  req: Request<object, object, ResetPasswordRequestBody>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const result = await resetPasswordUser(req.body)
+    res.status(200).json({
+      status: 'success',
+      message: result.message,
+    })
+  } catch (err) {
+    handleError(err, res, next)
+  }
+}
+

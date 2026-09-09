@@ -87,7 +87,9 @@ export async function listFiles(userId: string, mentorshipId?: string) {
     }
     filter['mentorshipId'] = new Types.ObjectId(mentorshipId)
   } else {
-    filter['uploaderId'] = new Types.ObjectId(userId)
+    // When no mentorshipId is specified, only list public campus files (exclude private mentorship/chat files)
+    filter['mentorshipId'] = { $in: [null, undefined] }
+    filter['conversationId'] = { $in: [null, undefined] }
   }
 
   return SharedFile.find(filter)
@@ -105,24 +107,44 @@ export async function getFileRecord(id: string) {
   return file
 }
 
-export async function verifyFileAccess(file: { uploaderId: Types.ObjectId; mentorshipId?: Types.ObjectId; conversationId?: Types.ObjectId }, userId: string): Promise<boolean> {
+export async function verifyFileAccess(
+  file: {
+    uploaderId: Types.ObjectId
+    mentorshipId?: Types.ObjectId
+    conversationId?: Types.ObjectId
+  },
+  userId: string
+): Promise<boolean> {
+  // Uploader always has access
   if (file.uploaderId.toString() === userId) return true
 
+  // If attached to a private mentorship, ONLY members (mentor or mentee) have access
   if (file.mentorshipId) {
     const mentorship = await Mentorship.findById(file.mentorshipId).lean()
-    if (mentorship && (mentorship.mentorId.toString() === userId || mentorship.menteeId.toString() === userId)) {
+    if (
+      mentorship &&
+      (mentorship.mentorId.toString() === userId ||
+        mentorship.menteeId.toString() === userId)
+    ) {
       return true
     }
+    return false
   }
 
+  // If attached to a private conversation, ONLY conversation participants have access
   if (file.conversationId) {
     const conversation = await Conversation.findById(file.conversationId).lean()
-    if (conversation && conversation.participants.some((p) => p.toString() === userId)) {
+    if (
+      conversation &&
+      conversation.participants.some((p) => p.toString() === userId)
+    ) {
       return true
     }
+    return false
   }
 
-  return false
+  // General campus library file (not attached to any private mentorship or conversation)
+  return true
 }
 
 export async function incrementDownload(id: string) {

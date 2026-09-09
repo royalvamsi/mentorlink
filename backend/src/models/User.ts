@@ -9,6 +9,8 @@ export interface IUser extends Document {
   email: string
   password: string
   role: UserRole
+  passwordResetToken?: string
+  passwordResetExpires?: Date
   createdAt: Date
   updatedAt: Date
   /** Instance method: compares a plain-text password against the stored hash. */
@@ -41,6 +43,16 @@ const userSchema = new Schema<IUser>(
       required: [true, 'Password is required'],
       minlength: [8, 'Password must be at least 8 characters'],
       select: false, // never returned in queries unless explicitly requested
+    },
+
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+
+    passwordResetExpires: {
+      type: Date,
+      select: false,
     },
 
     role: {

@@ -4,6 +4,15 @@ import { useAuth } from '../context/AuthContext'
 import { useSocket } from '../context/SocketContext'
 import { chatService, type Conversation, type Message } from '../services/chatService'
 import { Navbar } from '../components/Navbar'
+import {
+  Send,
+  MessageSquare,
+  Calendar,
+  Sparkles,
+  ChevronLeft,
+  ShieldCheck,
+  AlertCircle
+} from 'lucide-react'
 
 export default function ChatPage() {
   const { user } = useAuth()
@@ -224,49 +233,52 @@ export default function ChatPage() {
   const activeIsOnline = activeOther ? isUserOnline(activeOther._id) : false
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col font-sans text-slate-100 antialiased">
+    <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-indigo-500 selection:text-white">
       <Navbar />
 
       {/* Error Banner */}
       {errorBanner && (
-        <div className="bg-red-500/10 border-b border-red-500/20 px-6 py-2 flex items-center justify-between text-xs text-red-400">
-          <span>{errorBanner}</span>
-          <button onClick={() => setErrorBanner(null)} className="hover:text-white ml-4 font-bold">×</button>
+        <div className="bg-rose-50 border-b border-rose-200 px-6 py-2 flex items-center justify-between text-xs text-rose-700">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-500" />
+            <span>{errorBanner}</span>
+          </div>
+          <button onClick={() => setErrorBanner(null)} className="hover:text-rose-900 ml-4 font-bold">×</button>
         </div>
       )}
 
       {/* Main Container */}
       <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 105px)' }}>
         {/* Conversation List Sidebar */}
-        <aside className={`w-full md:w-80 border-r border-slate-800 bg-slate-900/30 flex flex-col shrink-0 ${activeConv ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+        <aside className={`w-full md:w-80 border-r border-slate-200 bg-white flex flex-col shrink-0 ${activeConv ? 'hidden md:flex' : 'flex'}`}>
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
             <div className="flex items-center gap-2">
-              <h2 className="font-semibold text-white text-sm">Direct Messages</h2>
-              <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} title={isConnected ? 'Connected' : 'Reconnecting...'} />
+              <h2 className="font-bold text-slate-900 text-sm">Direct Messages</h2>
+              <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-400'}`} title={isConnected ? 'Connected' : 'Reconnecting...'} />
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-medium">
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold border border-indigo-100">
               {conversations.length}
             </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-800/40">
+          <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
             {loadingConvs ? (
               <div className="p-6 space-y-4">
                 {[...Array(4)].map((_, i) => (
                   <div key={i} className="flex items-center gap-3 animate-pulse">
-                    <div className="w-10 h-10 rounded-xl bg-slate-800 shrink-0" />
+                    <div className="w-10 h-10 rounded-xl bg-slate-200 shrink-0" />
                     <div className="flex-1 space-y-2">
-                      <div className="h-3.5 bg-slate-800 rounded w-1/2" />
-                      <div className="h-2.5 bg-slate-800/60 rounded w-3/4" />
+                      <div className="h-3.5 bg-slate-200 rounded w-1/2" />
+                      <div className="h-2.5 bg-slate-100 rounded w-3/4" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : conversations.length === 0 ? (
-              <div className="p-8 text-center text-slate-500 text-xs">
-                <p className="mb-3 text-2xl">💬</p>
-                <p className="font-medium text-slate-400 mb-1">No conversations yet</p>
-                <p className="text-slate-500">Connections you make through mentorship will appear here.</p>
+              <div className="p-8 text-center text-slate-400 text-xs">
+                <MessageSquare className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                <p className="font-semibold text-slate-700 mb-1">No conversations yet</p>
+                <p className="text-slate-400">Accepted mentorship requests will automatically appear here.</p>
               </div>
             ) : (
               conversations.map((conv) => {
@@ -279,37 +291,37 @@ export default function ChatPage() {
                   <button
                     key={conv._id}
                     onClick={() => setActiveConv(conv)}
-                    className={`w-full flex items-center gap-3.5 px-4 py-3.5 hover:bg-slate-800/60 transition text-left relative ${
-                      isActive ? 'bg-slate-800/90 border-l-2 border-indigo-500' : ''
+                    className={`w-full flex items-center gap-3.5 px-4 py-3.5 hover:bg-slate-50 transition text-left relative ${
+                      isActive ? 'bg-indigo-50/60 border-l-3 border-indigo-600' : ''
                     }`}
                   >
                     <div className="relative shrink-0">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-sm shadow">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-sm shadow-xs">
                         {other?.name?.[0]?.toUpperCase() ?? '?'}
                       </div>
                       <span
-                        className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-900 ${
-                          isOnline ? 'bg-emerald-500' : 'bg-slate-600'
+                        className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
+                          isOnline ? 'bg-emerald-500' : 'bg-slate-300'
                         }`}
                         title={isOnline ? 'Online' : 'Offline'}
                       />
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium text-white text-sm truncate">{other?.name ?? 'User'}</span>
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">{other?.name ?? 'User'}</span>
                         {conv.lastMessageAt && (
-                          <span className="text-[11px] text-slate-500 shrink-0 ml-1">
+                          <span className="text-[10px] text-slate-400 shrink-0 ml-1 font-medium">
                             {new Date(conv.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         )}
                       </div>
                       <div className="flex items-center justify-between gap-1">
-                        <p className="text-xs text-slate-400 truncate max-w-[160px]">
+                        <p className="text-xs text-slate-500 truncate max-w-[150px]">
                           {conv.lastMessage ?? 'Started a conversation'}
                         </p>
                         {unread > 0 && (
-                          <span className="shrink-0 px-1.5 py-0.2 rounded-full bg-indigo-600 text-white text-[10px] font-bold">
+                          <span className="shrink-0 px-1.5 py-0.2 rounded-full bg-indigo-600 text-white text-[10px] font-extrabold">
                             {unread}
                           </span>
                         )}
@@ -323,73 +335,87 @@ export default function ChatPage() {
         </aside>
 
         {/* Chat Message Window */}
-        <main className={`flex-1 flex flex-col bg-slate-950 ${!activeConv ? 'hidden md:flex' : 'flex'}`}>
+        <main className={`flex-1 flex flex-col bg-slate-50 ${!activeConv ? 'hidden md:flex' : 'flex'}`}>
           {!activeConv || !activeOther ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-500">
-              <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-3xl mb-4 shadow-inner">
-                ✉️
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
+              <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-indigo-600 mb-4 shadow-xs">
+                <MessageSquare className="w-8 h-8" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-1">Select a conversation</h3>
-              <p className="text-sm text-slate-400 max-w-sm">
-                Choose a conversation from the sidebar or request mentorship to start a new chat.
+              <h3 className="text-base font-bold text-slate-900 mb-1">Select a conversation</h3>
+              <p className="text-xs text-slate-500 max-w-sm">
+                Choose a conversation from the sidebar or connect with a mentor to start collaborating.
               </p>
             </div>
           ) : (
             <>
               {/* Chat View Header */}
-              <div className="px-4 sm:px-6 py-3.5 border-b border-slate-800 bg-slate-900/40 flex items-center justify-between">
-                <div className="flex items-center gap-2 sm:gap-3.5">
+              <div className="px-4 sm:px-6 py-3 border-b border-slate-200/80 bg-white flex items-center justify-between shadow-xs">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <button
                     onClick={() => setActiveConv(null)}
-                    className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-800 border border-slate-700 focus:outline-none"
+                    className="md:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-200"
                     aria-label="Back to conversations"
                   >
-                    ←
+                    <ChevronLeft className="w-4 h-4" />
                   </button>
                   <div className="relative shrink-0">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-sm shadow">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white text-sm shadow-xs">
                       {activeOther.name[0]?.toUpperCase()}
                     </div>
                     <span
-                      className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-900 ${
-                        activeIsOnline ? 'bg-emerald-500' : 'bg-slate-600'
+                      className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
+                        activeIsOnline ? 'bg-emerald-500' : 'bg-slate-300'
                       }`}
                     />
                   </div>
                   <div>
-                    <div className="font-semibold text-white text-sm leading-tight">{activeOther.name}</div>
-                    <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
-                      <span className="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] uppercase font-medium tracking-wider text-slate-300">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-slate-900 text-sm leading-tight">{activeOther.name}</span>
+                      <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
+                      <span className="px-1.5 py-0.2 rounded bg-slate-100 text-[10px] uppercase font-bold tracking-wider text-slate-600">
                         {activeOther.role}
                       </span>
-                      <span>•</span>
-                      <span className={activeIsOnline ? 'text-emerald-400 font-medium' : 'text-slate-500'}>
+                      <span>·</span>
+                      <span className={activeIsOnline ? 'text-emerald-600 font-semibold' : 'text-slate-400'}>
                         {activeIsOnline ? 'Active now' : 'Offline'}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <Link
-                  to={`/profile`}
-                  className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-600 text-slate-300 hover:text-white transition"
-                >
-                  View Profile
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    to={`/scheduling`}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 text-xs font-semibold transition"
+                  >
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Schedule Session</span>
+                  </Link>
+                  <Link
+                    to={`/profile`}
+                    className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition"
+                  >
+                    Profile
+                  </Link>
+                </div>
               </div>
 
               {/* Message List */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
                 {loadingMsgs ? (
                   <div className="flex flex-col items-center justify-center h-full space-y-2">
-                    <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-xs text-slate-500">Loading messages...</p>
+                    <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-xs text-slate-400">Loading messages...</p>
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center py-12 text-slate-500">
-                    <p className="text-3xl mb-2">👋</p>
-                    <p className="text-sm font-medium text-slate-300 mb-1">No messages yet</p>
-                    <p className="text-xs text-slate-500">Say hello and start the conversation!</p>
+                  <div className="flex flex-col items-center justify-center h-full text-center py-12 text-slate-400">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-2">
+                      <Sparkles className="w-6 h-6" />
+                    </div>
+                    <p className="text-xs font-bold text-slate-700 mb-1">Start the conversation</p>
+                    <p className="text-[11px] text-slate-400">Say hello and introduce your goals or questions!</p>
                   </div>
                 ) : (
                   messages.map((msg) => {
@@ -400,20 +426,20 @@ export default function ChatPage() {
                     return (
                       <div key={msg._id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                         <div
-                          className={`max-w-md md:max-w-lg px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm break-words ${
+                          className={`max-w-md md:max-w-lg px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs break-words ${
                             isMe
                               ? 'bg-indigo-600 text-white rounded-br-xs'
-                              : 'bg-slate-800/90 text-slate-100 border border-slate-700/60 rounded-bl-xs'
+                              : 'bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs'
                           }`}
                         >
                           <p>{msg.content}</p>
                         </div>
-                        <div className="flex items-center gap-1.5 mt-1 px-1 text-[11px] text-slate-500">
+                        <div className="flex items-center gap-1.5 mt-1 px-1 text-[10px] text-slate-400 font-medium">
                           <span>
                             {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                           {isMe && (
-                            <span className={isReadByOther ? 'text-indigo-400' : 'text-slate-500'}>
+                            <span className={isReadByOther ? 'text-indigo-600' : 'text-slate-400'}>
                               {isReadByOther ? '✓✓ Read' : '✓ Sent'}
                             </span>
                           )}
@@ -425,9 +451,9 @@ export default function ChatPage() {
 
                 {/* Typing Indicator */}
                 {typingUser && (
-                  <div className="flex items-center gap-2 text-xs text-indigo-400 pl-1 pt-1 animate-pulse">
-                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping" />
-                    <span>{activeOther.name} is typing...</span>
+                  <div className="flex items-center gap-2 text-xs text-indigo-600 pl-1 pt-1 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-ping" />
+                    <span className="font-semibold">{activeOther.name} is typing...</span>
                   </div>
                 )}
 
@@ -435,27 +461,26 @@ export default function ChatPage() {
               </div>
 
               {/* Message Composer */}
-              <div className="p-4 border-t border-slate-800 bg-slate-900/30">
-                <form onSubmit={handleSendMessage} className="flex items-center gap-3">
+              <div className="p-4 border-t border-slate-200 bg-white">
+                <form onSubmit={handleSendMessage} className="flex items-center gap-2 sm:gap-3">
                   <input
                     type="text"
                     value={input}
                     onChange={(e) => handleInputChange(e.target.value)}
                     placeholder={isConnected ? 'Type your message...' : 'Reconnecting to chat...'}
                     disabled={!isConnected}
-                    className="flex-1 px-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition disabled:opacity-50"
+                    className="flex-1 px-4 py-2.5 rounded-full bg-slate-100 border border-slate-200 text-slate-900 text-xs sm:text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition disabled:opacity-50"
                   />
                   <button
                     type="submit"
                     disabled={!input.trim() || !isConnected || sendingMsg}
-                    className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition shadow-md flex items-center justify-center shrink-0"
+                    className="p-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white transition shadow-sm flex items-center justify-center shrink-0"
+                    aria-label="Send message"
                   >
                     {sendingMsg ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                      </svg>
+                      <Send className="w-4 h-4" />
                     )}
                   </button>
                 </form>
@@ -467,4 +492,5 @@ export default function ChatPage() {
     </div>
   )
 }
+
 

@@ -53,4 +53,15 @@ describe('Phase 18 — Frontend Auth Service & Storage Tests', () => {
       expect(result.headers['Authorization']).toBe(`Bearer ${testToken}`)
     }
   })
+
+  it('should validate password length and confirmation equality', () => {
+    const isPasswordValid = (pwd: string) => pwd.length >= 8
+    const doPasswordsMatch = (p1: string, p2: string) => p1 === p2 && isPasswordValid(p1)
+
+    expect(isPasswordValid('short')).toBe(false)
+    expect(isPasswordValid('validPass123')).toBe(true)
+    expect(doPasswordsMatch('validPass123', 'differentPass123')).toBe(false)
+    expect(doPasswordsMatch('validPass123', 'validPass123')).toBe(true)
+  })
 })
+

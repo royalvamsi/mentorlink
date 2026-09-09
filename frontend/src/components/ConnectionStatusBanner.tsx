@@ -1,9 +1,11 @@
 import { useSocket } from '../context/SocketContext'
+import { useAuth } from '../context/AuthContext'
 
 export function ConnectionStatusBanner() {
+  const { isAuthenticated } = useAuth()
   const { isConnected } = useSocket()
 
-  if (isConnected) return null
+  if (!isAuthenticated || isConnected) return null
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-slate-800 border border-amber-500/40 shadow-lg flex items-center gap-2 text-sm text-amber-300 animate-pulse">

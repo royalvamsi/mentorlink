@@ -2,20 +2,18 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSocket } from '../context/SocketContext'
 import { notificationService, type NotificationItem } from '../services/notificationService'
-
-const ICONS: Record<string, string> = {
-  MENTORSHIP_REQUEST: '🤝',
-  REQUEST_ACCEPTED: '✅',
-  REQUEST_DECLINED: '❌',
-  BOOKING_CONFIRMED: '📅',
-  BOOKING_CANCELLED: '🚫',
-  BOOKING_REMINDER: '⏰',
-  NEW_MESSAGE: '💬',
-  FEEDBACK_RECEIVED: '⭐',
-  GOAL_COMPLETED: '🎯',
-  FORUM_REPLY: '💬',
-  SYSTEM: 'ℹ️',
-}
+import {
+  Bell,
+  CheckCheck,
+  Calendar,
+  MessageSquare,
+  Star,
+  Target,
+  Users,
+  Info,
+  CheckCircle2,
+  XCircle
+} from 'lucide-react'
 
 function fmt(d: string) {
   const diff = Date.now() - new Date(d).getTime()
@@ -33,7 +31,6 @@ export function NotificationBell() {
   const [loading, setLoading] = useState(false)
   const dropRef = useRef<HTMLDivElement>(null)
 
-  // Load on open
   useEffect(() => {
     if (!open) return
     setLoading(true)
@@ -42,7 +39,6 @@ export function NotificationBell() {
     }).catch(() => {}).finally(() => setLoading(false))
   }, [open])
 
-  // Inject real-time notification at top of list
   useEffect(() => {
     if (!latestNotification) return
     setItems(prev => {
@@ -51,7 +47,6 @@ export function NotificationBell() {
     })
   }, [latestNotification])
 
-  // Close on outside click
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (dropRef.current && !dropRef.current.contains(e.target as Node)) setOpen(false)
@@ -76,64 +71,96 @@ export function NotificationBell() {
     if (item.link) navigate(item.link)
   }
 
+  function getNotificationIcon(type: string) {
+    switch (type) {
+      case 'MENTORSHIP_REQUEST':
+        return <Users className="w-4 h-4 text-indigo-600" />
+      case 'REQUEST_ACCEPTED':
+        return <CheckCircle2 className="w-4 h-4 text-teal-600" />
+      case 'REQUEST_DECLINED':
+        return <XCircle className="w-4 h-4 text-rose-500" />
+      case 'BOOKING_CONFIRMED':
+      case 'BOOKING_REMINDER':
+        return <Calendar className="w-4 h-4 text-blue-600" />
+      case 'NEW_MESSAGE':
+      case 'FORUM_REPLY':
+        return <MessageSquare className="w-4 h-4 text-indigo-600" />
+      case 'FEEDBACK_RECEIVED':
+        return <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+      case 'GOAL_COMPLETED':
+        return <Target className="w-4 h-4 text-emerald-600" />
+      default:
+        return <Info className="w-4 h-4 text-slate-500" />
+    }
+  }
+
   return (
     <div ref={dropRef} className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        className="relative p-2 rounded-lg hover:bg-slate-800 transition text-slate-400 hover:text-white"
+        className="relative p-2 rounded-xl bg-slate-100/80 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/80 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
         aria-label="Notifications"
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
+        <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center w-4 h-4 text-[10px] font-bold bg-red-500 text-white rounded-full">
+          <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-rose-500 text-white rounded-full shadow-sm animate-pulse">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-10 w-80 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-            <span className="text-sm font-semibold text-white">Notifications</span>
-            <button onClick={handleMarkAllRead} className="text-xs text-indigo-400 hover:text-indigo-300 transition">Mark all read</button>
+        <div className="absolute right-0 top-11 w-84 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-1">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+            <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">Notifications</span>
+            <button
+              onClick={handleMarkAllRead}
+              className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 transition"
+            >
+              <CheckCheck className="w-3.5 h-3.5" />
+              <span>Mark all read</span>
+            </button>
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <div className="flex items-center justify-center py-10">
+              <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : items.length === 0 ? (
-            <div className="py-8 text-center text-slate-500 text-sm">
-              <div className="text-3xl mb-2">🔔</div>
+            <div className="py-10 text-center text-slate-400 text-xs">
+              <Bell className="w-8 h-8 mx-auto text-slate-300 mb-2" />
               No notifications yet
             </div>
           ) : (
-            <div className="max-h-80 overflow-y-auto">
+            <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
               {items.map(item => (
                 <button
                   key={item._id}
                   onClick={() => handleClick(item)}
-                  className={`w-full text-left px-4 py-3 border-b border-slate-800/50 hover:bg-slate-800/50 transition flex gap-3 ${!item.read ? 'bg-indigo-500/5' : ''}`}
+                  className={`w-full text-left p-3.5 hover:bg-slate-50 transition flex items-start gap-3 ${!item.read ? 'bg-indigo-50/40' : ''}`}
                 >
-                  <span className="text-lg shrink-0 mt-0.5">{ICONS[item.type] ?? 'ℹ️'}</span>
+                  <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                    {getNotificationIcon(item.type)}
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-white truncate">{item.title}</p>
-                      {!item.read && <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />}
+                    <div className="flex items-center justify-between gap-2 mb-0.5">
+                      <p className="text-xs font-semibold text-slate-900 truncate">{item.title}</p>
+                      {!item.read && <span className="w-2 h-2 rounded-full bg-indigo-600 shrink-0" />}
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{item.body}</p>
-                    <p className="text-xs text-slate-500 mt-1">{fmt(item.createdAt)}</p>
+                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{item.body}</p>
+                    <p className="text-[10px] text-slate-400 mt-1 font-medium">{fmt(item.createdAt)}</p>
                   </div>
                 </button>
               ))}
             </div>
           )}
 
-          <div className="px-4 py-2 border-t border-slate-800">
-            <button onClick={() => { navigate('/notifications'); setOpen(false) }} className="w-full text-center text-xs text-indigo-400 hover:text-indigo-300 transition py-1">
-              View all notifications
+          <div className="p-2 border-t border-slate-100 bg-slate-50/50">
+            <button
+              onClick={() => { navigate('/notifications'); setOpen(false) }}
+              className="w-full text-center text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition py-1.5 rounded-lg hover:bg-indigo-50"
+            >
+              View all notifications →
             </button>
           </div>
         </div>
@@ -141,3 +168,4 @@ export function NotificationBell() {
     </div>
   )
 }
+

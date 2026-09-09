@@ -3,24 +3,32 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { adminService, type Report, type AdminUser, type AdminStats, type ReportStatus } from '../services/adminService'
 import { Navbar } from '../components/Navbar'
+import {
+  ShieldAlert,
+  Users,
+  Flag,
+  MessageSquare,
+  Search,
+  CheckCircle2,
+  AlertCircle
+} from 'lucide-react'
 
 const ROLES = ['JUNIOR', 'SENIOR', 'ALUMNI', 'ADMIN']
 const STATUS_COLORS: Record<ReportStatus, string> = {
-  PENDING: 'bg-amber-500/20 text-amber-300',
-  REVIEWED: 'bg-blue-500/20 text-blue-300',
-  RESOLVED: 'bg-green-500/20 text-green-300',
-  DISMISSED: 'bg-slate-700 text-slate-400',
+  PENDING:   'bg-amber-50 text-amber-800 border-amber-200',
+  REVIEWED:  'bg-blue-50 text-blue-700 border-blue-200',
+  RESOLVED:  'bg-emerald-50 text-emerald-700 border-emerald-200',
+  DISMISSED: 'bg-slate-100 text-slate-500 border-slate-200',
 }
 
-function fmt(d: string) { return new Date(d).toLocaleDateString([], { dateStyle: 'medium' }) }
+function fmt(d: string) {
+  return new Date(d).toLocaleDateString([], { dateStyle: 'medium' })
+}
 
 type Tab = 'overview' | 'reports' | 'users'
 
 export default function AdminPage() {
   const { user } = useAuth()
-
-  // Guard: only ADMIN users can see this page
-  if (user?.role !== 'ADMIN') return <Navigate to="/dashboard" replace />
 
   const [tab, setTab] = useState<Tab>('overview')
   const [stats, setStats] = useState<AdminStats | null>(null)
@@ -33,82 +41,139 @@ export default function AdminPage() {
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
+    if (user?.role !== 'ADMIN') return
     adminService.getStats().then(setStats).catch(() => {})
-  }, [])
+  }, [user?.role])
 
   useEffect(() => {
+    if (user?.role !== 'ADMIN') return
     if (tab === 'reports') {
       setLoading(true)
-      adminService.getReports(reportFilter || undefined).then(d => setReports(d.reports)).catch(() => setError('Failed')).finally(() => setLoading(false))
+      adminService.getReports(reportFilter || undefined).then((d) => setReports(d.reports)).catch(() => setError('Failed to load reports')).finally(() => setLoading(false))
     } else if (tab === 'users') {
       setLoading(true)
-      adminService.getUsers(1, userSearch || undefined).then(d => setUsers(d.users)).catch(() => setError('Failed')).finally(() => setLoading(false))
+      adminService.getUsers(1, userSearch || undefined).then((d) => setUsers(d.users)).catch(() => setError('Failed to load users')).finally(() => setLoading(false))
     }
-  }, [tab, reportFilter, userSearch])
+  }, [user?.role, tab, reportFilter, userSearch])
 
   async function handleResolve(id: string, status: ReportStatus) {
-    setError(''); setSuccess('')
+    setError('')
+    setSuccess('')
     try {
       await adminService.resolveReport(id, status)
-      setReports(prev => prev.map(r => r._id === id ? { ...r, status } : r))
-      setSuccess('Report updated')
-    } catch { setError('Failed to update report') }
+      setReports((prev) => prev.map((r) => (r._id === id ? { ...r, status } : r)))
+      setSuccess('Report status updated')
+    } catch {
+      setError('Failed to update report')
+    }
   }
 
   async function handleRoleChange(userId: string, role: string) {
-    setError(''); setSuccess('')
+    setError('')
+    setSuccess('')
     try {
       await adminService.updateUserRole(userId, role)
-      setUsers(prev => prev.map(u => u._id === userId ? { ...u, role } : u))
-      setSuccess('Role updated')
-    } catch { setError('Failed to update role') }
+      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, role } : u)))
+      setSuccess('User role successfully updated')
+    } catch {
+      setError('Failed to update role')
+    }
+  }
+
+  if (user?.role !== 'ADMIN') {
+    return <Navigate to="/dashboard" replace />
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-indigo-500 selection:text-white">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 w-full">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
-          <p className="text-sm text-slate-400 mt-1">Moderation and user management</p>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 w-full">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
+            <ShieldAlert className="w-4 h-4" />
+          </span>
+          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">Campus Oversight</span>
         </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Admin Console</h1>
+        <p className="text-slate-500 text-xs sm:text-sm mt-0.5 mb-6">Manage user accounts, roles, content moderation, and platform metrics.</p>
 
-        {error && <div className="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{error}</div>}
-        {success && <div className="mb-4 px-4 py-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm">{success}</div>}
+        {error && (
+          <div className="mb-4 px-4 py-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+        {success && (
+          <div className="mb-4 px-4 py-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>{success}</span>
+          </div>
+        )}
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          {(['overview', 'reports', 'users'] as Tab[]).map(t => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition ${tab === t ? 'bg-indigo-600 text-white' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'}`}>
+        {/* Tab Controls */}
+        <div className="flex gap-2 mb-6 border-b border-slate-200 pb-3 flex-wrap">
+          {(['overview', 'reports', 'users'] as Tab[]).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition ${
+                tab === t
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
               {t}
             </button>
           ))}
         </div>
 
-        {/* Overview */}
+        {/* Overview Tab */}
         {tab === 'overview' && stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { label: 'Total Users', value: stats.totalUsers, icon: '👥', color: 'from-blue-500 to-indigo-600' },
-              { label: 'Pending Reports', value: stats.pendingReports, icon: '🚩', color: 'from-red-500 to-rose-600' },
-              { label: 'Total Reports', value: stats.totalReports, icon: '📋', color: 'from-amber-500 to-orange-600' },
-              { label: 'Forum Posts', value: stats.totalPosts, icon: '💬', color: 'from-purple-500 to-violet-600' },
-            ].map(s => (
-              <div key={s.label} className={`bg-gradient-to-br ${s.color} rounded-2xl p-5 text-white`}>
-                <div className="text-3xl mb-2">{s.icon}</div>
-                <div className="text-2xl font-bold">{s.value}</div>
-                <div className="text-sm text-white/70">{s.label}</div>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div className="text-2xl font-black text-slate-900">{stats.totalUsers}</div>
+                <div className="text-xs text-slate-400 mt-0.5">Total Members</div>
               </div>
-            ))}
-            <div className="col-span-2 md:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-5">
-              <h2 className="text-sm font-semibold text-slate-400 mb-3">Role Breakdown</h2>
+
+              <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-3">
+                  <Flag className="w-5 h-5" />
+                </div>
+                <div className="text-2xl font-black text-slate-900">{stats.pendingReports}</div>
+                <div className="text-xs text-slate-400 mt-0.5">Pending Reports</div>
+              </div>
+
+              <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center mb-3">
+                  <ShieldAlert className="w-5 h-5" />
+                </div>
+                <div className="text-2xl font-black text-slate-900">{stats.totalReports}</div>
+                <div className="text-xs text-slate-400 mt-0.5">Total Reports Filed</div>
+              </div>
+
+              <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-3">
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+                <div className="text-2xl font-black text-slate-900">{stats.totalPosts}</div>
+                <div className="text-xs text-slate-400 mt-0.5">Discussion Posts</div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-xs">
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Role Distribution</h2>
               <div className="flex gap-4 flex-wrap">
-                {stats.roleBreakdown.map(r => (
-                  <div key={r._id} className="flex items-center gap-2">
-                    <span className="text-sm text-slate-400">{r._id}:</span>
-                    <span className="font-bold text-white">{r.count}</span>
+                {stats.roleBreakdown.map((r) => (
+                  <div key={r._id} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+                    <span className="text-xs font-bold text-slate-700">{r._id}</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-extrabold border border-indigo-100">
+                      {r.count}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -116,75 +181,133 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Reports */}
+        {/* Reports Tab */}
         {tab === 'reports' && (
           <div>
-            <div className="flex gap-2 mb-4 flex-wrap">
-              {['', 'PENDING', 'REVIEWED', 'RESOLVED', 'DISMISSED'].map(s => (
-                <button key={s || 'all'} onClick={() => setReportFilter(s)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${reportFilter === s ? 'bg-indigo-600 text-white' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'}`}>
-                  {s || 'All'}
+            <div className="flex gap-1.5 mb-4 flex-wrap">
+              {['', 'PENDING', 'REVIEWED', 'RESOLVED', 'DISMISSED'].map((s) => (
+                <button
+                  key={s || 'all'}
+                  onClick={() => setReportFilter(s)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                    reportFilter === s
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {s || 'All Reports'}
                 </button>
               ))}
             </div>
-            {loading ? <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" /></div>
-              : reports.length === 0 ? <div className="text-center py-12 text-slate-500">No reports</div>
-              : (
-                <div className="space-y-3">
-                  {reports.map(r => (
-                    <div key={r._id} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
-                      <div className="flex items-start justify-between gap-4 mb-2">
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[r.status]}`}>{r.status}</span>
-                            <span className="text-xs text-slate-500">{r.targetType}</span>
-                            <span className="text-xs font-medium text-white">{r.reason}</span>
-                          </div>
-                          <p className="text-sm text-slate-400 mt-1">by {r.reporterId.name} · {fmt(r.createdAt)}</p>
-                          {r.description && <p className="text-xs text-slate-500 mt-1">"{r.description}"</p>}
+
+            {loading ? (
+              <div className="flex justify-center py-16 bg-white rounded-3xl border border-slate-200/80">
+                <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : reports.length === 0 ? (
+              <div className="text-center py-16 px-4 bg-white border border-slate-200/80 rounded-3xl text-slate-400 text-xs shadow-xs">
+                <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500 mb-2" />
+                <p className="font-bold text-slate-700 mb-1">Zero pending reports</p>
+                <p className="text-slate-400">All community moderation items have been reviewed.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {reports.map((r) => (
+                  <div key={r._id} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${STATUS_COLORS[r.status]}`}>
+                            {r.status}
+                          </span>
+                          <span className="text-xs px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-semibold">
+                            {r.targetType}
+                          </span>
+                          <span className="text-xs font-bold text-slate-900">{r.reason}</span>
                         </div>
-                        {r.status === 'PENDING' && (
-                          <div className="flex gap-2 shrink-0">
-                            <button onClick={() => handleResolve(r._id, 'RESOLVED')} className="text-xs px-3 py-1.5 rounded-lg bg-green-500/20 text-green-300 hover:bg-green-500/30 transition">Resolve</button>
-                            <button onClick={() => handleResolve(r._id, 'DISMISSED')} className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition">Dismiss</button>
-                          </div>
+                        <p className="text-xs text-slate-500 mt-1">
+                          Reported by <strong className="text-slate-700">{r.reporterId?.name}</strong> on {fmt(r.createdAt)}
+                        </p>
+                        {r.description && (
+                          <p className="text-xs text-slate-600 italic mt-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            "{r.description}"
+                          </p>
                         )}
                       </div>
+
+                      {r.status === 'PENDING' && (
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => handleResolve(r._id, 'RESOLVED')}
+                            className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition"
+                          >
+                            Resolve
+                          </button>
+                          <button
+                            onClick={() => handleResolve(r._id, 'DISMISSED')}
+                            className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold transition"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Users */}
+        {/* Users Tab */}
         {tab === 'users' && (
           <div>
-            <input value={userSearch} onChange={e => setUserSearch(e.target.value)}
-              className="w-full max-w-sm px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"
-              placeholder="Search users by name or email…" />
-            {loading ? <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" /></div>
-              : (
-                <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="border-b border-slate-800">
-                      <tr className="text-xs text-slate-500 uppercase tracking-wider">
-                        <th className="px-4 py-3 text-left">Name</th>
-                        <th className="px-4 py-3 text-left">Email</th>
-                        <th className="px-4 py-3 text-left">Joined</th>
-                        <th className="px-4 py-3 text-left">Role</th>
+            <div className="relative max-w-sm mb-4">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                className="w-full pl-9.5 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
+                placeholder="Search members by name or email..."
+              />
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center py-16 bg-white rounded-3xl border border-slate-200/80">
+                <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <div className="bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr className="text-slate-500 uppercase tracking-wider font-bold text-[10px]">
+                        <th className="px-5 py-3.5 text-left">Member Name</th>
+                        <th className="px-5 py-3.5 text-left">Email Address</th>
+                        <th className="px-5 py-3.5 text-left">Joined Date</th>
+                        <th className="px-5 py-3.5 text-left">Access Role</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800">
-                      {users.map(u => (
-                        <tr key={u._id} className="hover:bg-slate-800/50 transition">
-                          <td className="px-4 py-3 text-white font-medium">{u.name}</td>
-                          <td className="px-4 py-3 text-slate-400">{u.email}</td>
-                          <td className="px-4 py-3 text-slate-500">{fmt(u.createdAt)}</td>
-                          <td className="px-4 py-3">
-                            <select value={u.role} onChange={e => handleRoleChange(u._id, e.target.value)}
-                              className="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 focus:outline-none cursor-pointer">
-                              {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                    <tbody className="divide-y divide-slate-100">
+                      {users.map((u) => (
+                        <tr key={u._id} className="hover:bg-slate-50/70 transition">
+                          <td className="px-5 py-3.5 text-slate-900 font-bold flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
+                              {u.name[0]?.toUpperCase()}
+                            </div>
+                            <span>{u.name}</span>
+                          </td>
+                          <td className="px-5 py-3.5 text-slate-500">{u.email}</td>
+                          <td className="px-5 py-3.5 text-slate-400">{fmt(u.createdAt)}</td>
+                          <td className="px-5 py-3.5">
+                            <select
+                              value={u.role}
+                              onChange={(e) => handleRoleChange(u._id, e.target.value)}
+                              className="text-xs font-semibold px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 focus:outline-none cursor-pointer"
+                            >
+                              {ROLES.map((r) => (
+                                <option key={r} value={r}>{r}</option>
+                              ))}
                             </select>
                           </td>
                         </tr>
@@ -192,10 +315,12 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                 </div>
-              )}
+              </div>
+            )}
           </div>
         )}
       </main>
     </div>
   )
 }
+

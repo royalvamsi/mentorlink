@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
+import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import { env } from '../config/env'
@@ -77,4 +78,28 @@ describe('Phase 18 — Authentication Unit & Security Tests', () => {
       jwt.verify(token, env.JWT_SECRET)
     }, jwt.TokenExpiredError)
   })
+
+  it('should generate cryptographically secure reset tokens and sha256 hash', () => {
+    const rawToken = crypto.randomBytes(32).toString('hex')
+    assert.equal(rawToken.length, 64)
+
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex')
+    assert.equal(hashedToken.length, 64)
+    assert.notEqual(rawToken, hashedToken)
+
+    const hashedAgain = crypto.createHash('sha256').update(rawToken).digest('hex')
+    assert.equal(hashedToken, hashedAgain)
+  })
+
+  it('should calculate and validate reset token expiration (15 minutes)', () => {
+    const now = Date.now()
+    const expires = new Date(now + 15 * 60 * 1000)
+
+    assert.ok(expires.getTime() > now)
+    assert.ok(expires.getTime() - now <= 15 * 60 * 1000 + 1000)
+
+    const pastExpires = new Date(now - 1000)
+    assert.ok(pastExpires.getTime() < now)
+  })
 })
+

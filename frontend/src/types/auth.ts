@@ -47,3 +47,28 @@ export interface MeResponse {
   status: string
   data: User
 }
+
+export interface ForgotPasswordData {
+  email: string
+}
+
+export interface ResetPasswordData {
+  token: string
+  password: string
+}
+
+export interface ForgotPasswordResponse {
+  status: string
+  message: string
+  data?: {
+    message: string
+    resetToken?: string
+    resetUrl?: string
+  }
+}
+
+export interface ResetPasswordResponse {
+  status: string
+  message: string
+}
+

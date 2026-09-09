@@ -1,4 +1,4 @@
-﻿import { Request, Response, NextFunction } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import { getOrCreateConversation, getMyConversations, getMessages, markRead, getUnreadCount, ChatServiceError } from '../services/chat.service'
 
 function handleError(err: unknown, res: Response, next: NextFunction): void {
@@ -8,9 +8,10 @@ function handleError(err: unknown, res: Response, next: NextFunction): void {
 
 export async function openConversation(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { userId } = req.body as { userId: string }
-    if (!userId) { res.status(400).json({ status: 'error', message: 'userId required' }); return }
-    const conv = await getOrCreateConversation(req.user!.userId, userId)
+    const { userId, recipientId } = req.body as { userId?: string; recipientId?: string }
+    const targetUserId = userId || recipientId
+    if (!targetUserId) { res.status(400).json({ status: 'error', message: 'userId required' }); return }
+    const conv = await getOrCreateConversation(req.user!.userId, targetUserId)
     res.status(200).json({ status: 'success', data: conv })
   } catch (err) { handleError(err, res, next) }
 }

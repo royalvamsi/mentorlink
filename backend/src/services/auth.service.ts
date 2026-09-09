@@ -1,9 +1,13 @@
+import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
 import User from '../models/User'
 import { env } from '../config/env'
 import {
   RegisterRequestBody,
   LoginRequestBody,
+  ForgotPasswordRequestBody,
+  ResetPasswordRequestBody,
+  ForgotPasswordResult,
   AuthResult,
   SafeUser,
   JwtPayload,
@@ -145,3 +149,89 @@ export async function getMeUser(userId: string): Promise<SafeUser> {
   }
   return toSafeUser(user)
 }
+
+// ─── Forgot Password ─────────────────────────────────────────────────────────
+
+export async function forgotPasswordUser(
+  body: ForgotPasswordRequestBody
+): Promise<ForgotPasswordResult> {
+  const { email } = body
+
+  if (!email) {
+    throw new AuthServiceError(400, 'email is required')
+  }
+
+  if (!isValidEmail(email)) {
+    throw new AuthServiceError(400, 'Invalid email format')
+  }
+
+  const normalisedEmail = email.trim().toLowerCase()
+  const user = await User.findOne({ email: normalisedEmail })
+
+  const defaultMessage =
+    'If an account exists with this email address, password reset instructions have been generated.'
+
+  if (!user) {
+    return { message: defaultMessage }
+  }
+
+  // Generate a cryptographically secure 32-byte token
+  const resetToken = crypto.randomBytes(32).toString('hex')
+  const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex')
+
+  // Set token and expiry (15 minutes from now)
+  user.passwordResetToken = hashedToken
+  user.passwordResetExpires = new Date(Date.now() + 15 * 60 * 1000)
+  await user.save({ validateBeforeSave: false })
+
+  const clientOrigin = env.CLIENT_ORIGIN.split(',')[0].trim()
+  const resetUrl = `${clientOrigin}/reset-password?token=${resetToken}`
+
+  console.log(`[Auth] Password reset token generated for ${normalisedEmail}`)
+
+  if (env.NODE_ENV !== 'production') {
+    return {
+      message: defaultMessage,
+      resetToken,
+      resetUrl,
+    }
+  }
+
+  return { message: defaultMessage }
+}
+
+// ─── Reset Password ──────────────────────────────────────────────────────────
+
+export async function resetPasswordUser(
+  body: ResetPasswordRequestBody
+): Promise<{ message: string }> {
+  const { token, password } = body
+
+  if (!token || !password) {
+    throw new AuthServiceError(400, 'token and password are required')
+  }
+
+  if (password.length < 8) {
+    throw new AuthServiceError(400, 'Password must be at least 8 characters')
+  }
+
+  const hashedToken = crypto.createHash('sha256').update(token.trim()).digest('hex')
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: new Date() },
+  }).select('+passwordResetToken +passwordResetExpires')
+
+  if (!user) {
+    throw new AuthServiceError(400, 'Invalid or expired password reset token')
+  }
+
+  // Update password (triggers bcrypt hashing in User pre-save hook)
+  user.password = password
+  user.passwordResetToken = undefined
+  user.passwordResetExpires = undefined
+  await user.save()
+
+  return { message: 'Password has been reset successfully. You can now sign in.' }
+}
+

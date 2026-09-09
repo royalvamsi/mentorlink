@@ -1,4 +1,4 @@
-﻿import {
+import {
   createContext,
   useContext,
   useEffect,
@@ -88,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     localStorage.removeItem('ml_token')
     dispatch({ type: 'CLEAR_USER' })
+    window.location.href = '/login'
   }, [])
 
   return (

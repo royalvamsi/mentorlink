@@ -35,6 +35,21 @@ export interface LoginRequestBody {
   password: string
 }
 
+export interface ForgotPasswordRequestBody {
+  email: string
+}
+
+export interface ResetPasswordRequestBody {
+  token: string
+  password: string
+}
+
+export interface ForgotPasswordResult {
+  message: string
+  resetToken?: string
+  resetUrl?: string
+}
+
 // ─── Service Return Types ────────────────────────────────────────────────────
 
 /** Safe user data returned in API responses — password is always excluded. */

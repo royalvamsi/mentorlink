@@ -3,6 +3,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import { env } from './config/env'
+import { isOriginAllowed } from './config/cors'
 import healthRoutes from './routes/healthRoutes'
 import authRoutes from './routes/authRoutes'
 import profileRoutes from './routes/profileRoutes'
@@ -30,7 +31,13 @@ app.use(helmet({
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 app.use(
   cors({
-    origin: env.CLIENT_ORIGIN.split(',').map((o) => o.trim()),
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) {
+        callback(null, true)
+      } else {
+        callback(null, false)
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -42,7 +49,7 @@ app.use(
 /** Strict limiter for auth endpoints — prevent brute-force */
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
-  max: 20,
+  max: env.NODE_ENV === 'production' ? 20 : 500,
   standardHeaders: true,
   legacyHeaders: false,
   message: { status: 'error', message: 'Too many requests, please try again later' },
